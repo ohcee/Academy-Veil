@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lesson 2: Setting Up the Wallet + Snapshot</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <img src="veil-logo.png" alt="Veil Logo" style="height: 60px; margin-bottom: 20px;">
+  <nav>
+    <a href="index.html">Home</a> |
+    <a href="lesson1.html">Lesson 1</a> |
+    <a href="lesson2.html" class="active">Lesson 2</a> |
+    <a href="lesson3.html">Lesson 3</a> |
+    <a href="lesson4.html">Lesson 4</a> |
+    <a href="lesson5.html">Lesson 5</a> |
+    <a href="lesson6.html">Lesson 6</a> |
+    <a href="lesson7.html">Lesson 7</a> |
+    <a href="lesson8.html">Lesson 8</a> |
+    <a href="lesson9.html">Lesson 9</a> |
+    <a href="lesson10.html">Lesson 10</a> |
+    <a href="lesson11.html">Lesson 11</a> |
+  </nav>
+
+  <div id="xpBar">XP: 0</div>
+
+  <h2>Lesson 2: Setting Up the Veil Wallet & Using a Snapshot</h2>
+
+  <p>Before you can stake, send, or mint Veil, you will need to set up the Veil Core Wallet. This lesson will guide you through:</p>
+  <ul>
+    <li>Downloading and installing the wallet</li>
+    <li>Using a blockchain snapshot to sync faster</li>
+    <li>Basic wallet setup tips</li>
+  </ul>
+
+  <h3>Install the Wallet</h3>
+  <p>
+    Go to <a href="https://github.com/Veil-Project/veil/releases" target="_blank">Veil Releases</a> and download the wallet for your OS.<br>
+    Install it like any other app. On first run, close the wallet so you can use the snapshot method below.
+  </p>
+
+  <h3>Download and Apply the Snapshot</h3>
+  <ol>
+    <li>Go to the <a href="https://veil-tools.com/snapshots" target="_blank">Veil Tools</a> site and download the snapshot closest to your region.</li>
+    <li>Extract the snapshot. (Example: to your Desktop.)</li>
+    <li>Open your file browser and navigate to your home folder.</li>
+    <li>Find and open the <code>.veil</code> folder.<br>
+    <li>Delete the following folders inside <code>.veil</code>:
+      <ul>
+        <li><code>blocks</code></li>
+        <li><code>chainstate</code></li>
+        <li><code>indexes</code></li>
+        <li><code>zerocoin</code></li>
+      </ul>
+    </li>
+    <li>Copy or move the same folders from the snapshot into the <code>.veil</code> folder.</li>
+    <li>Once transferred, close the window and launch the wallet.</li>
+  </ol>
+
+  <h3>First Wallet Steps</h3>
+  <ul>
+    <li>Let it fully sync, then you're ready to mint and stake</li>
+    <li>(Sugguested) Encrypt your wallet from Settings</li>
+  </ul>
+  <form id="quizForm" data-lesson="lesson2">
+    <p>1. What folders must you delete before applying the snapshot?</p>
+    <input type="radio" name="q1" value="a"> wallet.dat and peers.dat<br>
+    <input type="radio" name="q1" value="b"> blocks, chainstate, indexes, zerocoin<br>
+    <input type="radio" name="q1" value="c"> logs and database<br>
+
+    <p>2. What folder is used to store Veil blockchain data?</p>
+    <input type="radio" name="q2" value="a"> /VeilData/<br>
+    <input type="radio" name="q2" value="b"> .veil<br>
+    <input type="radio" name="q2" value="c"> veil-storage<br>
+
+    <p>3. What shortcut reveals hidden folders on most systems?</p>
+    <input type="radio" name="q3" value="a"> Ctrl + Z<br>
+    <input type="radio" name="q3" value="b"> Ctrl + H<br>
+    <input type="radio" name="q3" value="c"> Ctrl + F<br>
+
+    <p>Enter your Veil address:</p>
+    <input type="text" id="veilAddress"><br><br>
+
+    <button type="submit">Submit</button>
+  </form>
+
+  <div id="result"></div>
+  <div id="badgeBox" style="display:none; margin-top:20px;">
+    <img src="veil_badge.png" alt="Veil Badge" style="height: 80px;"><br>
+    <p>You earned a Veil Academy badge. Share it:</p>
+    <button onclick="copyBadge()">Copy Link</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script>
+  function copyBadge() {
+    navigator.clipboard.writeText("https://veilproject.org/academy/badge.png");
+    alert("Badge link copied.");
+  }
+  window.quizAnswers = {
+    q1: "b",
+    q2: "b",
+    q3: "b"
+  };
+  </script>
+  <script src="quiz-reward.js"></script>
+
+</body>
+</html>

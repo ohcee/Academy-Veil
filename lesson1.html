@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lesson 1: What is the Veil-Project?</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <img src="veil-logo.png" alt="Veil Logo" style="height: 60px; margin-bottom: 20px;">
+  <nav style="margin-bottom: 20px;">
+    <a href="index.html">Home</a> |
+    <a href="lesson1.html" class="active">Lesson 1</a> |
+    <a href="lesson2.html">Lesson 2</a> |
+    <a href="lesson3.html">Lesson 3</a> |
+    <a href="lesson4.html">Lesson 4</a> |
+    <a href="lesson5.html">Lesson 5</a> |
+    <a href="lesson6.html">Lesson 6</a> |
+    <a href="lesson7.html">Lesson 7</a> |
+    <a href="lesson8.html">Lesson 8</a> |
+    <a href="lesson9.html">Lesson 9</a> |
+    <a href="lesson10.html">Lesson 10</a> |
+    <a href="lesson11.html">Lesson 11</a> |
+  </nav>
+
+  <div id="xpBar">XP: 0</div>
+
+  <h2>Lesson 1: What is Veil?</h2>
+
+  <p>
+    Veil is a privacy-focused cryptocurrency that launched in 2019. It uses a combination of RingCT and stealth addresses to keep amounts and participants private, along with Dandelion++ to obfuscate your IP address during transaction broadcasting.
+  </p>
+
+  <p>
+    Veil has a maximum supply of 300 million coins and is powered by a hybrid 50/50 Proof-of-Stake and Proof-of-Work system. The Proof-of-Work mining is further split across three algorithms:
+  </p>
+
+  <ul>
+    <li>ProgPoW: 35 percent of daily blocks</li>
+    <li>RandomX: 10 percent of daily blocks</li>
+    <li>SHA256d: 5 percent of daily blocks</li>
+    <li>Staking: 50 percent of daily blocks</li>
+  </ul>
+
+  <p>
+    This combination supports decentralization across different hardware types while rewarding both miners and stakers.
+  </p>
+
+  <form id="quizForm" data-lesson="lesson1">
+    <p>1. What does RingCT hide?</p>
+    <input type="radio" name="q1" value="a"> Only the sender<br>
+    <input type="radio" name="q1" value="b"> The sender, receiver, and amount<br>
+    <input type="radio" name="q1" value="c"> Only the fee<br>
+
+    <p>2. Which technologies does Veil use for privacy?</p>
+    <input type="radio" name="q2" value="a"> RingCT, stealth addresses, and Dandelion++<br>
+    <input type="radio" name="q2" value="b"> SegWit and Lightning Network<br>
+    <input type="radio" name="q2" value="c"> zk-SNARKS and Taproot<br>
+
+    <p>3. How is Veil's block reward distributed?</p>
+    <input type="radio" name="q3" value="a"> 70 percent mining, 30 percent staking<br>
+    <input type="radio" name="q3" value="b"> 50 percent staking, 50 percent mining<br>
+    <input type="radio" name="q3" value="c"> 25 percent staking, 75 percent mining<br>
+
+    <p>4. Which Veil mining algorithm produces the most blocks daily?</p>
+    <input type="radio" name="q4" value="a"> SHA256d<br>
+    <input type="radio" name="q4" value="b"> RandomX<br>
+    <input type="radio" name="q4" value="c"> ProgPoW<br>
+
+    <p>Enter your Veil address:</p>
+    <input type="text" id="veilAddress"><br><br>
+
+    <button type="submit">Submit</button>
+  </form>
+
+  <div id="result"></div>
+  <div id="badgeBox" style="display:none; margin-top:20px;">
+    <img src="veil_badge.png" alt="Veil Badge" style="height: 80px;"><br>
+    <p>You earned a Veil Academy badge. Share it:</p>
+    <button onclick="copyBadge()">Copy Link</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script>
+    function copyBadge() {
+      navigator.clipboard.writeText("https://veilproject.org/academy/badge.png");
+      alert("Badge link copied.");
+    }
+  </script>
+  <script>
+  // Answer key for Lesson 1
+  window.quizAnswers = {
+    q1: "b",
+    q2: "a",
+    q3: "b",
+    q4: "c"
+  };
+  </script>
+  <script src="quiz-reward.js"></script>
+
+</body>
+</html>

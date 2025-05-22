@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lesson 9: Veil Mining Algorithms</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <img src="veil-logo.png" alt="Veil Logo" style="height: 60px; margin-bottom: 20px;">
+  <nav>
+    <a href="index.html">Home</a> |
+    <a href="lesson1.html">Lesson 1</a> |
+    <a href="lesson2.html">Lesson 2</a> |
+    <a href="lesson3.html">Lesson 3</a> |
+    <a href="lesson4.html">Lesson 4</a> |
+    <a href="lesson5.html">Lesson 5</a> |
+    <a href="lesson6.html">Lesson 6</a> |
+    <a href="lesson7.html">Lesson 7</a> |
+    <a href="lesson8.html">Lesson 8</a> |
+    <a href="lesson9.html" class="active">Lesson 9</a> |
+    <a href="lesson10.html">Lesson 10</a>
+    <a href="lesson11.html">Lesson 11</a> |
+  </nav>
+
+  <div id="xpBar">XP: 0</div>
+
+  <h2>Lesson 9: Mining Algorithms and How to Mine Each</h2>
+
+  <p>
+    The Veil network supports three Proof-of-Work mining algorithms. Each is optimized for a different type of hardware, offering flexibility for miners and greater decentralization.
+  </p>
+
+  <ul>
+    <li><strong>ProgPoW</strong>: GPU-friendly and ASIC-resistant. Use miners like T-Rex, TTminer, or Wildrig. Requires the solo <a href="https://github.com/us77ipis/veil-node-stratum-proxy" target="_blank">mining proxy</a>.</li>
+    <li><strong>RandomX</strong>: CPU-optimized. Use XMRig compiled from source. Source code is available <a href="https://github.com/us77ipis/xmrig-veil" target="_blank">here</a>.</li>
+    <li><strong>SHA256d</strong>: The original Bitcoin algorithm. Currently, SHA256d mining is only available inside the Veil Core Wallet using in-wallet CPU mining. A guide is available <a href="https://medium.com/veil-project/veil-project-mining-guide-in-wallet-miner-9a355f662de9" target="_blank">here</a>.</li>
+  </ul>
+
+  <p>
+    Each algorithm runs on its own chain with independent difficulty. Choose based on your available hardware. ProgPoW is the most active mining option. RandomX is supported by the only public mining pool, available <a href="https://fastpool.xyz/veil-rx/" target="_blank">here</a>.
+  </p>
+
+  <form id="quizForm" data-lesson="lesson9">
+    <p>1. Which Veil algorithm is optimized for GPU mining?</p>
+    <input type="radio" name="q1" value="a"> RandomX<br>
+    <input type="radio" name="q1" value="b"> SHA256d<br>
+    <input type="radio" name="q1" value="c"> ProgPoW<br>
+
+    <p>2. What algorithm allows home users to mine Veil within the core wallet?</p>
+    <input type="radio" name="q2" value="a"> SHA256d<br>
+    <input type="radio" name="q2" value="b"> ProgPoW<br>
+    <input type="radio" name="q2" value="c"> RandomX<br>
+
+    <p>3. What is the purpose of Veil supporting three different algorithms?</p>
+    <input type="radio" name="q3" value="a"> To reduce staking rewards<br>
+    <input type="radio" name="q3" value="b"> To make the network more decentralized<br>
+    <input type="radio" name="q3" value="c"> To make the network more centralized<br>
+
+    <p>Enter your Veil address:</p>
+    <input type="text" id="veilAddress"><br><br>
+
+    <button type="submit">Submit</button>
+  </form>
+
+  <div id="result"></div>
+  <div id="badgeBox" style="display:none; margin-top:20px;">
+    <img src="veil_badge.png" alt="Veil Badge" style="height: 80px;"><br>
+    <p>You earned a Veil Academy badge. Share it:</p>
+    <button onclick="copyBadge()">Copy Link</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script>
+  function copyBadge() {
+    navigator.clipboard.writeText("https://veilproject.org/academy/badge.png");
+    alert("Badge link copied.");
+  }
+
+  window.quizAnswers = {
+    q1: "c",
+    q2: "a",
+    q3: "b"
+  };
+  </script>
+  <script src="quiz-reward.js"></script>
+
+</body>
+</html>

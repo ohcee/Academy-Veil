@@ -1,0 +1,175 @@
+body {
+  background-color: #0d0d0d;
+  color: #e0e0e0;
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 50px 20px 50px 20px;
+}
+
+h1, h2 {
+  color: #00bfff;
+  text-align: center;
+}
+
+a {
+  color: #00ffcc;
+  text-decoration: none;
+  text-align: center;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+nav {
+  background-color: #1a1a1a;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #333;
+  text-align: center;
+  margin-left: 40px;
+  margin-right: 40px;
+}
+
+nav a {
+  color: #00ffcc;
+  margin-right: 15px;
+  text-decoration: none;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+form {
+  margin-top: 20px;
+  background-color: #1a1a1a;
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #333;
+  max-width: fit-content;
+}
+
+input[type="radio"], input[type="text"] {
+  margin-bottom: 10px;
+  padding: 5px;
+}
+
+button {
+  background-color: #00bfff;
+  color: black;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0099cc;
+}
+
+#result {
+  margin-top: 20px;
+  font-weight: bold;
+}
+
+nav a.active {
+  color: #ffffff;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+#xpBar {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: #222;
+  padding: 10px 15px;
+  border: 1px solid #444;
+  border-radius: 5px;
+  font-size: 0.9em;
+  color: #00ffcc;
+}
+
+.hero {
+    margin-bottom: 30px;
+}
+
+hero h1 {
+  font-size: 2.4em;
+  margin-bottom: 0.2em;
+}
+
+.subtitle {
+  font-size: 1.3em;
+  color: #666;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.lesson-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 15px;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+.lesson-card {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 20px;
+  text-decoration: none;
+  color: #00ffcc;
+  box-shadow: 0 0 10px rgba(0, 255, 204, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.lesson-card span {
+  display: block;
+  font-size: 16px;
+  color: #cccccc;
+  margin-top: 5px;
+}
+
+.lesson-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 15px rgba(0, 255, 204, 0.25);
+  background-color: #222;
+}
+
+footer {
+  margin-top: 40px;
+  margin-left: 50px;
+  margin-right: 50px;
+  font-size: 16px;;
+  color: #00ffcc;
+  background-color: #1a1a1a;
+  padding: 20px;
+}
+
+footer a {
+  color: #00bfff;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
+
+.lesson-card span:last-child {
+  margin-top: 8px;
+  display: block;
+  font-weight: bold;
+  color: #00ffcc;
+}
+
+.lesson-grid {
+    background-color: #1a1a1a;
+    padding: 30px;
+}
+
+p {
+    text-align: justify;
+}

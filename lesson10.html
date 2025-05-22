@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lesson 10: Staking Zerocoin Mints</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <img src="veil-logo.png" alt="Veil Logo" style="height: 60px; margin-bottom: 20px;">
+  <nav>
+    <a href="index.html">Home</a> |
+    <a href="lesson1.html">Lesson 1</a> |
+    <a href="lesson2.html">Lesson 2</a> |
+    <a href="lesson3.html">Lesson 3</a> |
+    <a href="lesson4.html">Lesson 4</a> |
+    <a href="lesson5.html">Lesson 5</a> |
+    <a href="lesson6.html">Lesson 6</a> |
+    <a href="lesson7.html">Lesson 7</a> |
+    <a href="lesson8.html">Lesson 8</a> |
+    <a href="lesson9.html">Lesson 9</a> |
+    <a href="lesson10.html" class="active">Lesson 10</a> |
+    <a href="lesson11.html">Lesson 11</a> |
+  </nav>
+
+  <div id="xpBar">XP: 0</div>
+
+  <h2>Lesson 10: How to Stake Zerocoin Mints</h2>
+
+  <p>
+    Veil uses a staking system based on Zerocoin mints. Only minted coins can stake and earn rewards. Once you've minted into one of the four supported denominations (10, 100, 1000, 10000), you're ready to begin staking.
+  </p>
+
+  <ol>
+    <li>Open the Veil Core Wallet</li>
+    <li>Enable staking</li>
+    <li>Keep the wallet running and online</li>
+    <li>Use high-value mints like 10000 for better staking performance</li>
+    <li>Let rewards accumulate and compound to increase your staking weight</li>
+  </ol>
+
+  <p>
+    To check if staking is active, look for the slider icon in the wallet interface. 
+  </p>
+
+  <p>
+    If staking is not active, verify that your wallet is synced, unlocked, and that your coins are mature and properly minted.
+  </p>
+
+  <form id="quizForm" data-lesson="lesson10">
+    <p>1. What kind of coins are required to stake on the Veil network?</p>
+    <input type="radio" name="q1" value="a"> Basecoin<br>
+    <input type="radio" name="q1" value="b"> Stealth<br>
+    <input type="radio" name="q1" value="c"> Zerocoins<br>
+
+    <p>2. What must be true for staking to work?</p>
+    <input type="radio" name="q2" value="a"> Wallet must be unlocked and online<br>
+    <input type="radio" name="q2" value="b"> Wallet must be closed<br>
+    <input type="radio" name="q2" value="c"> Wallet must be connected to an exchange<br>
+
+    <p>3. What is one reason to use 10000-denomination mints?</p>
+    <input type="radio" name="q3" value="a"> They allow trading on mobile<br>
+    <input type="radio" name="q3" value="b"> They stake faster and more efficiently<br>
+    <input type="radio" name="q3" value="c"> They hide your public key<br>
+
+    <p>Enter your Veil address:</p>
+    <input type="text" id="veilAddress"><br><br>
+
+    <button type="submit">Submit</button>
+  </form>
+
+  <div id="result"></div>
+  <div id="badgeBox" style="display:none; margin-top:20px;">
+    <img src="veil_badge.png" alt="Veil Badge" style="height: 80px;"><br>
+    <p>You earned a Veil Academy badge. Share it:</p>
+    <button onclick="copyBadge()">Copy Link</button>
+  </div>
+  <div id="nextLesson" style="display:none; margin-top: 20px;">
+    <a id="nextLink" class="button" href="#">Go to Next Lesson →</a>
+  </div>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script>
+  function copyBadge() {
+    navigator.clipboard.writeText("https://veilproject.org/academy/badge.png");
+    alert("Badge link copied.");
+  }
+
+  window.quizAnswers = {
+    q1: "c",
+    q2: "a",
+    q3: "b"
+  };
+  </script>
+  <script src="quiz-reward.js"></script>
+
+</body>
+</html>

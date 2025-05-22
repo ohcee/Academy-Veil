@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lesson 5: Where to Get Veil</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <img src="veil-logo.png" alt="Veil Logo" style="height: 60px; margin-bottom: 20px;">
+  <nav style="margin-bottom: 20px;">
+    <a href="index.html">Home</a> |
+    <a href="lesson1.html">Lesson 1</a> |
+    <a href="lesson2.html">Lesson 2</a> |
+    <a href="lesson3.html">Lesson 3</a> |
+    <a href="lesson4.html">Lesson 4</a> |
+    <a href="lesson5.html" class="active">Lesson 5</a> |
+    <a href="lesson6.html">Lesson 6</a> |
+    <a href="lesson7.html">Lesson 7</a> |
+    <a href="lesson8.html">Lesson 8</a> |
+    <a href="lesson9.html">Lesson 9</a> |
+    <a href="lesson10.html">Lesson 10</a> |
+    <a href="lesson11.html">Lesson 11</a> |
+  </nav>
+
+  <div id="xpBar">XP: 0</div>
+
+  <h2>Lesson 5: Where to Get Veil</h2>
+
+  <p>
+    There are several ways to get Veil depending on your needs:
+    <ul>
+      <li>Use the <strong><a href="https://discord.com/channels/481997816982405130/1120138723787558993" target="_blank">Discord Faucet</a></strong> get 10 free Veil daily</li>
+      <li>Trade privately using <strong><a href="https://nonkyc.io/market/VEIL_USDT" target="_blank">Nonkyc.io</a></strong> (RingCT) or <strong><a href="https://tradeogre.com/exchange/VEIL-BTC" target="_blank">Tradeogre</a></strong> (Basecoin)</li>
+      <li>Buy through <strong><a href="https://www.probit.com/en-us/app/exchange/VEIL-USDT" target="_blank">Probit</a></strong> (Basecoin, KYC required)</li>
+    </ul>
+  </p>
+
+  <p>
+    The <strong><a href="veilproject.org" target="_blank">light wallet</a></strong> is best for quick, private trading and payments. The <strong><a href="https://veil-project.com/get-started/" target="_blank">core wallet</a></strong> is used for long-term storage and staking. Once you receive your coins, you can convert them to RingCT and make private transactions immediately.
+  </p>
+
+  <form id="quizForm" data-lesson="lesson5">
+    <p>1. Which of the following gives out Veil for free?</p>
+    <input type="radio" name="q1" value="a"> Binance<br>
+    <input type="radio" name="q1" value="b"> CoinMarketCap<br>
+    <input type="radio" name="q1" value="c"> The Discord Faucet<br>
+
+    <p>2. Which wallet is best for fast transactions?</p>
+    <input type="radio" name="q2" value="a"> Core wallet<br>
+    <input type="radio" name="q2" value="b"> Light wallet<br>
+    <input type="radio" name="q2" value="c"> Paper wallet<br>
+
+    <p>3. Which method allows anonymous Veil trading?</p>
+    <input type="radio" name="q3" value="a"> Coinbase<br>
+    <input type="radio" name="q3" value="b"> Nonkyc.io<br>
+    <input type="radio" name="q3" value="c"> Robinhood<br>
+
+    <p>Enter your Veil address:</p>
+    <input type="text" id="veilAddress"><br><br>
+
+    <button type="submit">Submit</button>
+  </form>
+
+  <div id="result"></div>
+  <div id="badgeBox" style="display:none; margin-top:20px;">
+    <img src="veil_badge.png" alt="Veil Badge" style="height: 80px;"><br>
+    <p>You earned a Veil Academy badge. Share it:</p>
+    <button onclick="copyBadge()">Copy Link</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script>
+  function copyBadge() {
+    navigator.clipboard.writeText("https://veilproject.org/academy/badge.png");
+    alert("Badge link copied.");
+  }
+
+  window.quizAnswers = {
+    q1: "c",
+    q2: "b",
+    q3: "b"
+  };
+  </script>
+  <script src="quiz-reward.js"></script>
+
+</body>
+</html>

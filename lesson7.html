@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lesson 7: Minting for Staking</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <img src="veil-logo.png" alt="Veil Logo" style="height: 60px; margin-bottom: 20px;">
+  <nav>
+    <a href="index.html">Home</a> |
+    <a href="lesson1.html">Lesson 1</a> |
+    <a href="lesson2.html">Lesson 2</a> |
+    <a href="lesson3.html">Lesson 3</a> |
+    <a href="lesson4.html">Lesson 4</a> |
+    <a href="lesson5.html">Lesson 5</a> |
+    <a href="lesson6.html">Lesson 6</a> |
+    <a href="lesson7.html" class="active">Lesson 7</a> |
+    <a href="lesson8.html">Lesson 8</a> |
+    <a href="lesson9.html">Lesson 9</a> |
+    <a href="lesson10.html">Lesson 10</a> |
+    <a href="lesson11.html">Lesson 11</a> |
+  </nav>
+
+  <div id="xpBar">XP: 0</div>
+
+  <h2>Lesson 7: Converting Coins & Minting Zerocoin for Staking</h2>
+
+  <p>
+    Veil supports multiple types of coins. To stake and earn rewards, your coins must be <strong>minted into Zerocoin</strong>. It is strongly recommended to use Veils RingCT privacy system when minting. Zerocoin minting uses four fixed denominations: 10, 100, 1000, or 10000.
+  </p>
+
+  <p>
+    You can mint Zerocoin from any coin type: <strong>Basecoin</strong>, <strong>Stealth</strong>, or <strong>RingCT</strong>. However, for <strong>maximum privacy</strong>, you should always mint from RingCT.
+  </p>
+
+  <p>
+    - Minting from Basecoin or Stealth will create valid Zerocoins, but outside observers might be able to trace the original input.<br>
+    - Minting from RingCT ensures that the amount, sender, and recipient remain private.
+  </p>
+
+  <p>
+    To stake:
+    <ol>
+      <li>Use the <strong>Veil Core Wallet</strong></li>
+      <li>Convert your coins to <strong>RingCT</strong></li>
+      <li>Mint them into one of the four Zerocoin denominations</li>
+      <li>Leave the wallet open and unlocked for staking</li>
+    </ol>
+    A staking guide is available <a href="https://medium.com/veil-project/navigating-veil-staking-your-path-to-secure-transactions-and-passive-rewards-f69b534a224c" target="_blank">here</a>.
+  </p>
+
+  <form id="quizForm" data-lesson="lesson7">
+    <p>1. Which type of coin is required to stake in Veil?</p>
+    <input type="radio" name="q1" value="a"> Basecoin<br>
+    <input type="radio" name="q1" value="b"> Stealth<br>
+    <input type="radio" name="q1" value="c"> Minted Zerocoin<br>
+
+    <p>2. Can you mint from any coin type?</p>
+    <input type="radio" name="q2" value="a"> No, only from RingCT<br>
+    <input type="radio" name="q2" value="b"> No, only from Stealth<br>
+    <input type="radio" name="q2" value="c"> Yes, from Basecoin, Stealth, or RingCT<br>
+
+    <p>3. Why is minting from RingCT better than Basecoin or Stealth?</p>
+    <input type="radio" name="q3" value="a"> It earns more staking rewards<br>
+    <input type="radio" name="q3" value="b"> It is required to unlock your wallet<br>
+    <input type="radio" name="q3" value="c"> It provides full privacy during minting<br>
+
+    <p>Enter your Veil address:</p>
+    <input type="text" id="veilAddress"><br><br>
+
+    <button type="submit">Submit</button>
+  </form>
+
+  <div id="result"></div>
+  <div id="badgeBox" style="display:none; margin-top:20px;">
+    <img src="veil_badge.png" alt="Veil Badge" style="height: 80px;"><br>
+    <p>You earned a Veil Academy badge. Share it:</p>
+    <button onclick="copyBadge()">Copy Link</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script>
+  function copyBadge() {
+    navigator.clipboard.writeText("https://veilproject.org/academy/badge.png");
+    alert("Badge link copied.");
+  }
+
+  window.quizAnswers = {
+    q1: "c",
+    q2: "c",
+    q3: "c"
+  };
+  </script>
+  <script src="quiz-reward.js"></script>
+
+</body>
+</html>
