@@ -1,158 +1,241 @@
+/* ===== Base layout ===== */
+
 body {
-  background-color: #0d0d0d;
+  background-color: #050608;
   color: #e0e0e0;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
   margin: 0;
-  padding: 50px 20px 50px 20px;
+  padding: 60px 0 40px 0;
 }
 
-h1, h2 {
+/* Headings */
+
+h1,
+h2,
+h3 {
   color: #00bfff;
   text-align: center;
+  margin-top: 0;
+}
+
+/* Text + links */
+
+p {
+  max-width: 900px;
+  margin: 0 auto 1em auto;
+  line-height: 1.5;
+  text-align: justify;
+}
+
+ul,
+ol {
+  max-width: 900px;
+  margin: 0 auto 1em auto;
+  padding-left: 1.4em;
+}
+
+li {
+  margin-bottom: 0.4em;
 }
 
 a {
   color: #00ffcc;
   text-decoration: none;
-  text-align: center;
 }
 
 a:hover {
   text-decoration: underline;
 }
 
+/* ===== Logo ===== */
+
+body > img:first-of-type {
+  display: block;
+  height: 60px;
+  margin: 0 auto 10px auto;
+}
+
+/* ===== Navigation ===== */
+
 nav {
   background-color: #1a1a1a;
-  /*padding: 15px;
-  margin-bottom: 20px;
-  margin-top:  20px;;*/
   border-bottom: 1px solid #333;
-  text-align: center;
-  margin-left: 110px;
-  margin-right: 110px;
-  background-size:auto;
+  margin: 20px auto;
+  padding: 8px 12px;
+
+  /* make the links wrap instead of going off-screen */
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  max-width: 1100px;
 }
 
 nav a {
   color: #00ffcc;
-  margin-right: 15px;
   text-decoration: none;
-}
-
-nav a:hover {
-  text-decoration: underline;
-  transform: translateY(-3px);
-  box-shadow: 0 0 15px rgba(0, 255, 204, 0.25);
-  background-color: #222;
-}
-
-form {
-  margin-top: 20px;
-  margin-left: 100px;
-  background-color: #1a1a1a;
-  padding: 20px;
-  border-radius: 10px;
-  border: 1px solid #333;
-  max-width: max-content;
-  text-align: center;
-
-}
-
-input[type="radio"], input[type="text"] {
-  margin-bottom: 10px;
-  padding: 5px;
-}
-
-button {
-  background-color: #00bfff;
-  color: black;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #0099cc;
-}
-
-#result {
-  margin-top: 20px;
-  font-weight: bold;
+  padding: 3px 6px;
 }
 
 nav a.active {
-  color: grey;
-  font-weight: bold;
-  text-decoration: underline;
+  background: rgba(0, 255, 204, 0.12);
+  border: 1px solid rgba(0, 255, 204, 0.3);
+  font-weight: 600;
 }
 
- #xpBar {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  background: #222;
-  padding: 10px 30px;
-  border: 1px solid #444;
-  border-radius: 5px;
-  font-size: 0.9em;
-  color: #00ffcc;
-  margin-top: 100px;
+nav a:hover {
+  text-decoration: none;
+  background-color: #1b1f27;
+  box-shadow: 0 0 12px rgba(0, 255, 204, 0.25);
+  transform: translateY(-1px);
 }
+
+/* ===== XP bar ===== */
+
+#xpBar {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  background: #111318;
+  padding: 8px 18px;
+  border: 1px solid #333a44;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  color: #00ffcc;
+  z-index: 10;
+}
+
+/* ===== Forms / quiz box ===== */
+
+form {
+  background-color: #111318;
+  padding: 20px 25px;
+  border-radius: 12px;
+  border: 1px solid #262a33;
+  max-width: 700px;
+  margin: 25px auto 10px auto;
+  text-align: left;
+  box-shadow: 0 0 18px rgba(0, 0, 0, 0.5);
+}
+
+form p {
+  max-width: none;
+  margin: 0 0 0.5em 0;
+  text-align: left;
+}
+
+input[type="radio"] {
+  margin-bottom: 6px;
+  margin-right: 4px;
+}
+
+input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 6px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #333a44;
+  background: #050608;
+  color: #e0e0e0;
+}
+
+/* Buttons */
+
+button {
+  background: linear-gradient(135deg, #00bfff, #00ffcc);
+  color: #050608;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-top: 10px;
+}
+
+button:hover {
+  background: linear-gradient(135deg, #00a0e0, #00d9b0);
+}
+
+/* "Next lesson" footer button if used */
+
+#nextLessonBtn {
+  display: inline-block;
+  margin: 25px auto 0 auto;
+}
+
+/* ===== Result text ===== */
+
+#result {
+  max-width: 700px;
+  margin: 15px auto 0 auto;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* ===== Home page hero + grid ===== */
 
 .hero {
-    margin-bottom: 30px;
-} ****/
-
-/*hero h1 {
-  font-size: 2.4em;
-  margin-bottom: 0.2em;
-  color: #00ffcc;
-}*/
+  max-width: 900px;
+  margin: 0 auto 25px auto;
+  text-align: center;
+}
 
 .subtitle {
-  font-size: 1.3em;
-  color: #666;
-  margin-bottom: 30px;
-  text-align: center;
+  font-size: 1.1rem;
+  color: #aaaaaa;
+  margin-top: 0.5em;
 }
 
 .lesson-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 15px;
-  max-width: 1100px;
+  gap: 18px;
+  max-width: 1000px;
   margin: 0 auto;
-  padding: 0;
+  padding: 24px;
+  background-color: #111318;
+  border-radius: 18px;
+  border: 1px solid #262a33;
 }
 
 .lesson-card {
-  background: #1a1a1a;
-  border: 1px solid #333;
-  border-radius: 10px;
-  padding: 20px;
+  background: #151822;
+  border: 1px solid #262a33;
+  border-radius: 12px;
+  padding: 16px 18px;
   text-decoration: none;
   color: #00ffcc;
-  box-shadow: 0 0 10px rgba(0, 255, 204, 0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 0 10px rgba(0, 255, 204, 0.08);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.lesson-card strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 1rem;
 }
 
 .lesson-card span {
   display: block;
-  font-size: 16px;
+  font-size: 0.9rem;
   color: #cccccc;
-  margin-top: 5px;
 }
 
 .lesson-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 0 15px rgba(0, 255, 204, 0.25);
-  background-color: #222;
+  box-shadow: 0 0 18px rgba(0, 255, 204, 0.3);
+  border-color: #00ffcc;
 }
+
+/* ===== Footer ===== */
 
 footer {
   text-align: center;
-  padding: auto;
+  padding: 16px 12px 0 12px;
+  font-size: 0.85rem;
+  color: #888;
 }
 
 footer a {
@@ -161,41 +244,4 @@ footer a {
 
 footer a:hover {
   text-decoration: underline;
-}
-
-.lesson-card span:last-child {
-  margin-top: 8px;
-  display: block;
-  font-weight: bold;
-  color: #00ffcc;
-}
-
-.lesson-grid {
-    background-color: #1a1a1a;
-    padding: 30px;
-}
-
-p {
-  text-align: justify;
-  margin-left: 100px;
-  margin-right: 100px;
-}
-
-ul {
-    margin-left: 100px;
-    margin-right: 100px;
-}
-
-img {
-  height: 30px; 
-  margin-left: 5px;
-  padding-top: 15px;
-}
-
-h3 {
-  margin-left: 100px;
-} 
-
-li {
-  margin-left: 100px;
 }

@@ -99,7 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!canRewardToday(reward)) {
       result.innerText =
-        "You completed the lesson 🎉 but reached the 50 VEIL daily reward cap. Try again tomorrow for more rewards.";
+        "You completed the lesson but reached the 50 VEIL daily reward cap. Try again tomorrow for more rewards.";
       result.style.color = "#ffcc00";
       return;
     }
