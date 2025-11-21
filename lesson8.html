@@ -5,20 +5,24 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+  <div data-current-lesson="8"></div>
+
   <img src="veil-logo.png" alt="Veil Logo" style="height: 60px; margin-bottom: 20px;">
+
   <nav>
     <a href="index.html">Home</a> |
-    <a href="lesson1.html">Lesson 1</a> |
-    <a href="lesson2.html">Lesson 2</a> |
-    <a href="lesson3.html">Lesson 3</a> |
-    <a href="lesson4.html">Lesson 4</a> |
-    <a href="lesson5.html">Lesson 5</a> |
-    <a href="lesson6.html">Lesson 6</a> |
-    <a href="lesson7.html">Lesson 7</a> |
-    <a href="lesson8.html" class="active">Lesson 8</a> |
-    <a href="lesson9.html">Lesson 9</a> |
-    <a href="lesson10.html">Lesson 10</a> |
-    <a href="lesson11.html">Lesson 11</a> |
+    <a href="lesson1.html" data-lesson-link="1">Lesson 1</a> |
+    <a href="lesson2.html" data-lesson-link="2">Lesson 2</a> |
+    <a href="lesson3.html" data-lesson-link="3">Lesson 3</a> |
+    <a href="lesson4.html" data-lesson-link="4">Lesson 4</a> |
+    <a href="lesson5.html" data-lesson-link="5">Lesson 5</a> |
+    <a href="lesson6.html" data-lesson-link="6">Lesson 6</a> |
+    <a href="lesson7.html" data-lesson-link="7">Lesson 7</a> |
+    <a href="lesson8.html" class="active" data-lesson-link="8">Lesson 8</a> |
+    <a href="lesson9.html" data-lesson-link="9">Lesson 9</a> |
+    <a href="lesson10.html" data-lesson-link="10">Lesson 10</a> |
+    <a href="lesson11.html" data-lesson-link="11">Lesson 11</a>
   </nav>
 
   <div id="xpBar">XP: 0</div>
@@ -26,24 +30,22 @@
   <h2>Lesson 8: Denominations and Staking Efficiency</h2>
 
   <p>
-    Veil's Zerocoin staking system uses fixed denominations when you mint coins. These denominations are 10, 100, 1000, and 10000. You must choose one of these sizes when minting RingCT coins into Zerocoin.
+    Veils Zerocoin staking system uses fixed denominations when you mint coins:
+    <strong>10, 100, 1000, and 10000</strong>. When converting RingCT to Zerocoin, you must choose one 
+    of these predetermined sizes.
   </p>
 
-  <p>
-    While all denominations are stakeable, larger ones are far more efficient and have a higher chance of producing rewards. This is because:
-  </p>
+  <p>While all denominations can stake, larger ones perform much better because:</p>
+
   <ul>
-    <li>The staking algorithm favors higher-value mints</li>
-    <li>10000-denomination mints are less fragmented and more likely to be selected</li>
-    <li>Minting lots of small coins can slow staking and increase wallet load</li>
+    <li>Higher-value mints have a stronger chance of being selected to stake</li>
+    <li>Large denominations reduce fragmentation</li>
+    <li>Your wallet runs faster and more efficiently</li>
   </ul>
 
   <p>
-    You can see live staking distribution data <a href="https://veil-stats.com/stakedistribution" target="_blank">here</a>.
-  </p>
-
-  <p>
-    When possible, you should mint your coins into the highest denomination available. For example, if you have 7000 Veil, you should mint seven 1000 Zerocoin mints. Once you go over 10000 Veil, you can spend the previously minted Zerocoins to yourself, consolidate the balance, and then re-mint them as a single 10000. This increases your chance of staking, reduces fragmentation, and keeps your wallet cleaner.
+    You can check live staking distribution here:  
+    <a href="https://veil-stats.com/stakedistribution" target="_blank">Veil Stats</a>.
   </p>
 
   <form id="quizForm" data-lesson="lesson8">
@@ -69,26 +71,37 @@
   </form>
 
   <div id="result"></div>
+
   <div id="badgeBox" style="display:none; margin-top:20px;">
     <img src="veil_badge.png" alt="Veil Badge" style="height: 80px;"><br>
     <p>You earned a Veil Academy badge. Share it:</p>
     <button onclick="copyBadge()">Copy Link</button>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <script>
-  function copyBadge() {
-    navigator.clipboard.writeText("https://veilproject.org/academy/badge.png");
-    alert("Badge link copied.");
-  }
+  <div style="margin-top: 40px; text-align: center;">
+    <button id="nextLessonBtn" disabled>
+      Finish this quiz to unlock the next lesson
+    </button>
+  </div>
 
-  window.quizAnswers = {
-    q1: "c",
-    q2: "b",
-    q3: "c"
-  };
+  <!-- Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <script>
+    function copyBadge() {
+      navigator.clipboard.writeText("https://veilproject.org/academy/badge.png");
+      alert("Badge link copied.");
+    }
+
+    window.quizAnswers = {
+      q1: "c",
+      q2: "b",
+      q3: "c"
+    };
   </script>
+
   <script src="quiz-reward.js"></script>
+  <script src="progress.js"></script>
 
 </body>
 </html>

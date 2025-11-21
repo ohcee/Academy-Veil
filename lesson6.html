@@ -5,20 +5,24 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+  <div data-current-lesson="6"></div>
+
   <img src="veil-logo.png" alt="Veil Logo" style="height: 60px; margin-bottom: 20px;">
-  <nav>
+
+  <nav style="margin-bottom: 20px;">
     <a href="index.html">Home</a> |
-    <a href="lesson1.html">Lesson 1</a> |
-    <a href="lesson2.html">Lesson 2</a> |
-    <a href="lesson3.html">Lesson 3</a> |
-    <a href="lesson4.html">Lesson 4</a> |
-    <a href="lesson5.html">Lesson 5</a> |
-    <a href="lesson6.html" class="active">Lesson 6</a> |
-    <a href="lesson7.html">Lesson 7</a> |
-    <a href="lesson8.html">Lesson 8</a> |
-    <a href="lesson9.html">Lesson 9</a> |
-    <a href="lesson10.html">Lesson 10</a> |
-    <a href="lesson11.html">Lesson 11</a> |
+    <a href="lesson1.html" data-lesson-link="1">Lesson 1</a> |
+    <a href="lesson2.html" data-lesson-link="2">Lesson 2</a> |
+    <a href="lesson3.html" data-lesson-link="3">Lesson 3</a> |
+    <a href="lesson4.html" data-lesson-link="4">Lesson 4</a> |
+    <a href="lesson5.html" data-lesson-link="5">Lesson 5</a> |
+    <a href="lesson6.html" class="active" data-lesson-link="6">Lesson 6</a> |
+    <a href="lesson7.html" data-lesson-link="7">Lesson 7</a> |
+    <a href="lesson8.html" data-lesson-link="8">Lesson 8</a> |
+    <a href="lesson9.html" data-lesson-link="9">Lesson 9</a> |
+    <a href="lesson10.html" data-lesson-link="10">Lesson 10</a> |
+    <a href="lesson11.html" data-lesson-link="11">Lesson 11</a>
   </nav>
 
   <div id="xpBar">XP: 0</div>
@@ -26,16 +30,18 @@
   <h2>Lesson 6: Basecoin vs Stealth vs RingCT</h2>
 
   <p>
-    Veil supports multiple privacy layers: <strong>Basecoin</strong>, <strong>Stealth</strong>, and <strong>RingCT</strong>. Each offers a different level of privacy and utility:
+    Veil supports multiple privacy layers: <strong>Basecoin</strong>, <strong>Stealth</strong>, and <strong>RingCT</strong>.
   </p>
+
   <ul>
-    <li><strong>Basecoin</strong>: Fully transparent like Bitcoin. Sender, receiver, and amount are public.</li>
-    <li><strong>Stealth</strong>: Hides the recipients address but still shows the amount.</li>
-    <li><strong>RingCT</strong>: Hides the sender, recipient, and amount. This offers maximum on-chain privacy.</li>
+    <li><strong>Basecoin</strong>: Transparent like Bitcoin. Sender, receiver, and amount are visible.</li>
+    <li><strong>Stealth</strong>: Hides the recipients address while still showing the amount.</li>
+    <li><strong>RingCT</strong>: Hides sender, receiver, AND amount, Veils strongest privacy option.</li>
   </ul>
 
   <p>
-    You can convert between these privacy types within the Veil Core Wallet depending on how you want to use your coins. RingCT offers the most privacy, but Stealth and Basecoin serve important roles for compatibility and flexibility.
+    You can freely convert between these types in the Veil Core Wallet.  
+    RingCT provides full privacy, while Stealth and Basecoin remain useful for flexibility, exchanges, and interoperability.
   </p>
 
   <form id="quizForm" data-lesson="lesson6">
@@ -44,7 +50,7 @@
     <input type="radio" name="q1" value="b"> Stealth<br>
     <input type="radio" name="q1" value="c"> RingCT<br>
 
-    <p>2. Which coin type is most similar to how Bitcoin works?</p>
+    <p>2. Which coin type is most similar to Bitcoin?</p>
     <input type="radio" name="q2" value="a"> Basecoin<br>
     <input type="radio" name="q2" value="b"> RingCT<br>
     <input type="radio" name="q2" value="c"> Zerocoin<br>
@@ -61,26 +67,36 @@
   </form>
 
   <div id="result"></div>
+
   <div id="badgeBox" style="display:none; margin-top:20px;">
     <img src="veil_badge.png" alt="Veil Badge" style="height: 80px;"><br>
     <p>You earned a Veil Academy badge. Share it:</p>
     <button onclick="copyBadge()">Copy Link</button>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <script>
-  function copyBadge() {
-    navigator.clipboard.writeText("https://veilproject.org/academy/badge.png");
-    alert("Badge link copied.");
-  }
+  <div style="margin-top: 40px; text-align: center;">
+    <button id="nextLessonBtn" disabled>
+      Finish this quiz to unlock the next lesson
+    </button>
+  </div>
 
-  window.quizAnswers = {
-    q1: "c",
-    q2: "a",
-    q3: "b"
-  };
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <script>
+    function copyBadge() {
+      navigator.clipboard.writeText("https://veilproject.org/academy/badge.png");
+      alert("Badge link copied.");
+    }
+
+    window.quizAnswers = {
+      q1: "c",
+      q2: "a",
+      q3: "b"
+    };
   </script>
+
   <script src="quiz-reward.js"></script>
+  <script src="progress.js"></script>
 
 </body>
 </html>

@@ -5,20 +5,24 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+  <div data-current-lesson="4"></div>
+
   <img src="veil-logo.png" alt="Veil Logo" style="height: 60px; margin-bottom: 20px;">
+
   <nav style="margin-bottom: 20px;">
     <a href="index.html">Home</a> |
-    <a href="lesson1.html">Lesson 1</a> |
-    <a href="lesson2.html">Lesson 2</a> |
-    <a href="lesson3.html">Lesson 3</a> |
-    <a href="lesson4.html" class="active">Lesson 4</a> |
-    <a href="lesson5.html">Lesson 5</a> |
-    <a href="lesson6.html">Lesson 6</a> |
-    <a href="lesson7.html">Lesson 7</a> |
-    <a href="lesson8.html">Lesson 8</a> |
-    <a href="lesson9.html">Lesson 9</a> |
-    <a href="lesson10.html">Lesson 10</a> |
-    <a href="lesson11.html">Lesson 11</a> |
+    <a href="lesson1.html" data-lesson-link="1">Lesson 1</a> |
+    <a href="lesson2.html" data-lesson-link="2">Lesson 2</a> |
+    <a href="lesson3.html" data-lesson-link="3">Lesson 3</a> |
+    <a href="lesson4.html" class="active" data-lesson-link="4">Lesson 4</a> |
+    <a href="lesson5.html" data-lesson-link="5">Lesson 5</a> |
+    <a href="lesson6.html" data-lesson-link="6">Lesson 6</a> |
+    <a href="lesson7.html" data-lesson-link="7">Lesson 7</a> |
+    <a href="lesson8.html" data-lesson-link="8">Lesson 8</a> |
+    <a href="lesson9.html" data-lesson-link="9">Lesson 9</a> |
+    <a href="lesson10.html" data-lesson-link="10">Lesson 10</a> |
+    <a href="lesson11.html" data-lesson-link="11">Lesson 11</a>
   </nav>
 
   <div id="xpBar">XP: 0</div>
@@ -26,38 +30,40 @@
   <h2>Lesson 4: How to Stake Veil</h2>
 
   <p>
-    Staking is the process of earning rewards by holding and minting your Veil coins in the Core Wallet. It helps secure the network and lets you earn passive income. Your coins remain in your wallet and are never sent to the network.
+    Staking is the process of earning rewards by holding and minting your Veil coins in the Core Wallet.
+    It helps secure the network and lets you earn passive income. Your coins remain in your wallet and are
+    never sent to a third party.
   </p>
 
-  <p>
-    To stake:
-    <ol>
-      <li>Download and install the Veil Core Wallet</li>
-      <li>Transfer coins into the wallet</li>
-      <li>Convert coins to RingCT and mint them</li>
-      <li>Unlock the wallet for staking and keep it open</li>
-    </ol>
-  </p>
+  <h3>How to Stake Veil</h3>
+
+  <ol>
+    <li>Download and install the Veil Core Wallet.</li>
+    <li>Transfer coins into your wallet.</li>
+    <li>Convert coins to RingCT and mint them.</li>
+    <li>Unlock your wallet for staking and leave it running.</li>
+  </ol>
 
   <p>
-    The more coins you stake, the better your chances of earning consistent rewards. Staking also supports Veils decentralized and energy-efficient consensus model.
+    The more coins you stake, the better your chances of earning consistent rewards. Staking also supports Veil’s decentralized,
+    energy-efficient consensus system.
   </p>
 
   <form id="quizForm" data-lesson="lesson4">
-    <p>1. What do you need to do to stake Veil?</p>
-    <input type="radio" name="q1" value="a"> Use the light wallet<br>
-    <input type="radio" name="q1" value="b"> Use a mining rig<br>
-    <input type="radio" name="q1" value="c"> Use the core wallet<br>
+    <p>1. What do you need to stake Veil?</p>
+    <input type="radio" name="q1" value="a"> The Light Wallet<br>
+    <input type="radio" name="q1" value="b"> A mining rig<br>
+    <input type="radio" name="q1" value="c"> The Core Wallet<br>
 
-    <p>2. What is the benefit of staking?</p>
+    <p>2. What is the main benefit of staking?</p>
     <input type="radio" name="q2" value="a"> Lower transaction fees<br>
     <input type="radio" name="q2" value="b"> Earn passive Veil rewards<br>
-    <input type="radio" name="q2" value="c"> Hide your address from everyone<br>
+    <input type="radio" name="q2" value="c"> Increased mining speed<br>
 
     <p>3. What happens to your coins during staking?</p>
     <input type="radio" name="q3" value="a"> They are sent to an exchange<br>
-    <input type="radio" name="q3" value="b"> They are spent immediately<br>
-    <input type="radio" name="q3" value="c"> They remain in your wallet and help secure the network<br>
+    <input type="radio" name="q3" value="b"> They are spent automatically<br>
+    <input type="radio" name="q3" value="c"> They stay in your wallet and secure the network<br>
 
     <p>Enter your Veil address:</p>
     <input type="text" id="veilAddress"><br><br>
@@ -66,26 +72,37 @@
   </form>
 
   <div id="result"></div>
+
   <div id="badgeBox" style="display:none; margin-top:20px;">
     <img src="veil_badge.png" alt="Veil Badge" style="height: 80px;"><br>
     <p>You earned a Veil Academy badge. Share it:</p>
     <button onclick="copyBadge()">Copy Link</button>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <script>
-  function copyBadge() {
-    navigator.clipboard.writeText("https://veilproject.org/academy/badge.png");
-    alert("Badge link copied.");
-  }
+  <div style="margin-top: 40px; text-align: center;">
+    <button id="nextLessonBtn" disabled>
+      Finish this quiz to unlock the next lesson
+    </button>
+  </div>
 
-  window.quizAnswers = {
-    q1: "c",
-    q2: "b",
-    q3: "c"
-  };
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <script>
+    function copyBadge() {
+      navigator.clipboard.writeText("https://veilproject.org/academy/badge.png");
+      alert("Badge link copied.");
+    }
+
+    // Answer key for Lesson 4
+    window.quizAnswers = {
+      q1: "c",
+      q2: "b",
+      q3: "c"
+    };
   </script>
+
   <script src="quiz-reward.js"></script>
+  <script src="progress.js"></script>
 
 </body>
 </html>

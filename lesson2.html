@@ -5,20 +5,24 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+  <div data-current-lesson="2"></div>
+
   <img src="veil-logo.png" alt="Veil Logo" style="height: 60px; margin-bottom: 20px;">
-  <nav>
+
+  <nav style="margin-bottom: 20px;">
     <a href="index.html">Home</a> |
-    <a href="lesson1.html">Lesson 1</a> |
-    <a href="lesson2.html" class="active">Lesson 2</a> |
-    <a href="lesson3.html">Lesson 3</a> |
-    <a href="lesson4.html">Lesson 4</a> |
-    <a href="lesson5.html">Lesson 5</a> |
-    <a href="lesson6.html">Lesson 6</a> |
-    <a href="lesson7.html">Lesson 7</a> |
-    <a href="lesson8.html">Lesson 8</a> |
-    <a href="lesson9.html">Lesson 9</a> |
-    <a href="lesson10.html">Lesson 10</a> |
-    <a href="lesson11.html">Lesson 11</a> |
+    <a href="lesson1.html" data-lesson-link="1">Lesson 1</a> |
+    <a href="lesson2.html" class="active" data-lesson-link="2">Lesson 2</a> |
+    <a href="lesson3.html" data-lesson-link="3">Lesson 3</a> |
+    <a href="lesson4.html" data-lesson-link="4">Lesson 4</a> |
+    <a href="lesson5.html" data-lesson-link="5">Lesson 5</a> |
+    <a href="lesson6.html" data-lesson-link="6">Lesson 6</a> |
+    <a href="lesson7.html" data-lesson-link="7">Lesson 7</a> |
+    <a href="lesson8.html" data-lesson-link="8">Lesson 8</a> |
+    <a href="lesson9.html" data-lesson-link="9">Lesson 9</a> |
+    <a href="lesson10.html" data-lesson-link="10">Lesson 10</a> |
+    <a href="lesson11.html" data-lesson-link="11">Lesson 11</a>
   </nav>
 
   <div id="xpBar">XP: 0</div>
@@ -40,10 +44,10 @@
 
   <h3>Download and Apply the Snapshot</h3>
   <ol>
-    <li>Go to the <a href="https://veil-tools.com/snapshots" target="_blank">Veil Tools</a> site and download the snapshot closest to your region.</li>
+    <li>Go to the <a href="https://veil.tools/snapshots" target="_blank">Veil Tools</a> site and download the snapshot closest to your region.</li>
     <li>Extract the snapshot. (Example: to your Desktop.)</li>
     <li>Open your file browser and navigate to your home folder.</li>
-    <li>Find and open the <code>.veil</code> folder.<br>
+    <li>Find and open the <code>.veil</code> folder.</li>
     <li>Delete the following folders inside <code>.veil</code>:
       <ul>
         <li><code>blocks</code></li>
@@ -58,9 +62,10 @@
 
   <h3>First Wallet Steps</h3>
   <ul>
-    <li>Let it fully sync, then you're ready to mint and stake</li>
-    <li>(Sugguested) Encrypt your wallet from Settings</li>
+    <li>Let it fully sync, then you're ready to mint and stake.</li>
+    <li>(Suggested) Encrypt your wallet from Settings.</li>
   </ul>
+
   <form id="quizForm" data-lesson="lesson2">
     <p>1. What folders must you delete before applying the snapshot?</p>
     <input type="radio" name="q1" value="a"> wallet.dat and peers.dat<br>
@@ -84,25 +89,36 @@
   </form>
 
   <div id="result"></div>
+
   <div id="badgeBox" style="display:none; margin-top:20px;">
     <img src="veil_badge.png" alt="Veil Badge" style="height: 80px;"><br>
     <p>You earned a Veil Academy badge. Share it:</p>
     <button onclick="copyBadge()">Copy Link</button>
   </div>
 
+  <div style="margin-top: 40px; text-align: center;">
+    <button id="nextLessonBtn" disabled>
+      Finish this quiz to unlock the next lesson
+    </button>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <script>
-  function copyBadge() {
-    navigator.clipboard.writeText("https://veilproject.org/academy/badge.png");
-    alert("Badge link copied.");
-  }
-  window.quizAnswers = {
-    q1: "b",
-    q2: "b",
-    q3: "b"
-  };
+    function copyBadge() {
+      navigator.clipboard.writeText("https://veilproject.org/academy/badge.png");
+      alert("Badge link copied.");
+    }
+
+    // Answer key for Lesson 2
+    window.quizAnswers = {
+      q1: "b",
+      q2: "b",
+      q3: "b"
+    };
   </script>
+
   <script src="quiz-reward.js"></script>
+  <script src="progress.js"></script>
 
 </body>
 </html>

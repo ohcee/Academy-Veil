@@ -5,51 +5,106 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!--<a href="http://veil-project.com"target="_blank"><img src="veil-logo.png" alt="Veil Logo"></a> -->
-    <h1>Welcome to Veil Academy</h1>
-  <nav>
-    <a href="http://veil-project.com"target="_blank"><img src="veil-logo.png" alt="Veil Logo"></a>
+
+  <h1>Welcome to Veil Academy</h1>
+
+  <nav style="margin-bottom: 20px;">
+    <a href="http://veil-project.com" target="_blank">
+      <img src="veil-logo.png" alt="Veil Logo" style="height: 50px;">
+    </a>
+    |
     <a href="index.html" class="active">Home</a> |
-    <a href="lesson1.html">Lesson 1</a> |
-    <a href="lesson2.html">Lesson 2</a> |
-    <a href="lesson3.html">Lesson 3</a> |
-    <a href="lesson4.html">Lesson 4</a> |
-    <a href="lesson5.html">Lesson 5</a> |
-    <a href="lesson6.html">Lesson 6</a> |
-    <a href="lesson7.html">Lesson 7</a> |
-    <a href="lesson8.html">Lesson 8</a> |
-    <a href="lesson9.html">Lesson 9</a> |
-    <a href="lesson10.html">Lesson 10</a> |
-    <a href="lesson11.html">Lesson 11</a> |
+    <a href="lesson1.html" data-lesson-link="1">Lesson 1</a> |
+    <a href="lesson2.html" data-lesson-link="2">Lesson 2</a> |
+    <a href="lesson3.html" data-lesson-link="3">Lesson 3</a> |
+    <a href="lesson4.html" data-lesson-link="4">Lesson 4</a> |
+    <a href="lesson5.html" data-lesson-link="5">Lesson 5</a> |
+    <a href="lesson6.html" data-lesson-link="6">Lesson 6</a> |
+    <a href="lesson7.html" data-lesson-link="7">Lesson 7</a> |
+    <a href="lesson8.html" data-lesson-link="8">Lesson 8</a> |
+    <a href="lesson9.html" data-lesson-link="9">Lesson 9</a> |
+    <a href="lesson10.html" data-lesson-link="10">Lesson 10</a> |
+    <a href="lesson11.html" data-lesson-link="11">Lesson 11</a>
   </nav>
 
   <div id="xpBar">XP: 0</div>
 
   <div class="hero">
-    <p class="subtitle">Master privacy, staking, and mining, and earn Veil with every lesson you complete.</p>
+    <p class="subtitle">
+      Master privacy, staking, mining, and earn Veil with every lesson you complete.
+    </p>
   </div>
 
   <section class="lesson-grid">
-    <a href="lesson1.html" class="lesson-card" data-lesson="lesson1_passed"><strong>Lesson 1</strong><br><span> What is the Veil-Project?</span></a><br>
-    <a href="lesson2.html" class="lesson-card" data-lesson="lesson2_passed"><strong>Lesson 2</strong><br><span>Setting up the Veil Core Wallet</span></a><br>
-    <a href="lesson3.html" class="lesson-card" data-lesson="lesson3_passed"><strong>Lesson 3</strong><br><span>How RingCT Works</span></a><br>
-    <a href="lesson4.html" class="lesson-card" data-lesson="lesson4_passed"><strong>Lesson 4</strong><br><span>How to Stake Veil</span></a><br>
-    <a href="lesson5.html" class="lesson-card" data-lesson="lesson5_passed"><strong>Lesson 5</strong><br><span>Where to Get Veil</span></a><br>
-    <a href="lesson6.html" class="lesson-card" data-lesson="lesson6_passed"><strong>Lesson 6</strong><br><span>Basecoin vs Stealth vs RingCT</span></a><br>
-    <a href="lesson7.html" class="lesson-card" data-lesson="lesson7_passed"><strong>Lesson 7</strong><br><span>Minting for Staking</span></a><br>
-    <a href="lesson8.html" class="lesson-card" data-lesson="lesson8_passed"><strong>Lesson 8</strong><br><span>Denominations & Efficiency</span></a><br>
-    <a href="lesson9.html" class="lesson-card" data-lesson="lesson9_passed"><strong>Lesson 9</strong><br><span>Mining Algorithms</span></a><br>
-    <a href="lesson10.html" class="lesson-card" data-lesson="lesson10_passed"><strong>Lesson 10</strong><br><span>Staking Zerocoin Mints</span></a><br>
-    <a href="lesson11.html" class="lesson-card" data-lesson="lesson11_passed"><strong>Lesson 11</strong><br><span>How to contribute</span></a><br>
+
+    <a href="lesson1.html" class="lesson-card" data-lesson-link="1">
+      <strong>Lesson 1</strong><br>
+      <span>What is the Veil-Project?</span>
+    </a>
+
+    <a href="lesson2.html" class="lesson-card" data-lesson-link="2">
+      <strong>Lesson 2</strong><br>
+      <span>Setting Up the Wallet + Snapshot</span>
+    </a>
+
+    <a href="lesson3.html" class="lesson-card" data-lesson-link="3">
+      <strong>Lesson 3</strong><br>
+      <span>How RingCT Works</span>
+    </a>
+
+    <a href="lesson4.html" class="lesson-card" data-lesson-link="4">
+      <strong>Lesson 4</strong><br>
+      <span>How to Stake Veil</span>
+    </a>
+
+    <a href="lesson5.html" class="lesson-card" data-lesson-link="5">
+      <strong>Lesson 5</strong><br>
+      <span>Where to Get Veil</span>
+    </a>
+
+    <a href="lesson6.html" class="lesson-card" data-lesson-link="6">
+      <strong>Lesson 6</strong><br>
+      <span>Basecoin vs Stealth vs RingCT</span>
+    </a>
+
+    <a href="lesson7.html" class="lesson-card" data-lesson-link="7">
+      <strong>Lesson 7</strong><br>
+      <span>Minting for Staking</span>
+    </a>
+
+    <a href="lesson8.html" class="lesson-card" data-lesson-link="8">
+      <strong>Lesson 8</strong><br>
+      <span>Denominations & Efficiency</span>
+    </a>
+
+    <a href="lesson9.html" class="lesson-card" data-lesson-link="9">
+      <strong>Lesson 9</strong><br>
+      <span>Mining Algorithms</span>
+    </a>
+
+    <a href="lesson10.html" class="lesson-card" data-lesson-link="10">
+      <strong>Lesson 10</strong><br>
+      <span>Staking Zerocoin Mints</span>
+    </a>
+
+    <a href="lesson11.html" class="lesson-card" data-lesson-link="11">
+      <strong>Lesson 11</strong><br>
+      <span>How to Contribute</span>
+    </a>
+
   </section>
 
+  <!-- Script that enables locking, completion checks, and XP -->
+  <script src="progress.js"></script>
+  <script src="quiz-reward.js"></script>
+
 </body>
-<footer>| Project <a href="https://veil-project.com" target="_blank">Website</a>
-      | Core <a href="https://github.com/Veil-Project/veil/releases"target="_blank">Wallet</a>
-      | Light <a href="https://github.com/Veil-Project/veil/releases" target="_blank">Wallet</a>
-      | Blockchain <a href="https://veil.tools" target="_blank">Snapshot</a>
-      | Live Stats <a href="https://veil-stats.com" target="_blank">Veil Stats</a>
-      | Project <a href="https://explorer.veil-project.com/main" target="_blank">Explorer</a>
-      | Project <a href="https://github.com/Veil-Project/veil"target="_blank">Github</a>
-      | Help <a href="https://veil.freshdesk.com/support/home"target="_blank">Desk</a></footer>
-</html>
+
+<footer>
+  | Project <a href="https://veil-project.com" target="_blank">Website</a>
+  | Core <a href="https://github.com/Veil-Project/veil/releases" target="_blank">Wallet</a>
+  | Light <a href="https://github.com/Veil-Project/veil/releases" target="_blank">Wallet</a>
+  | Blockchain <a href="https://veil.tools" target="_blank">Snapshot</a>
+  | Live Stats <a href="https://veil-stats.com" target="_blank">Veil Stats</a>
+  | Explorer <a href="https://explorer.veil-project.com/main" target="_blank">Mainnet</a>
+  | Github <a href="https://github.com/Veil-Proje
