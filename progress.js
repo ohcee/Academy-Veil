@@ -1,58 +1,51 @@
-// progress.js
-document.addEventListener("DOMContentLoaded", () => {
-  const TOTAL_LESSONS = 11;
+/**
+ * progress.js — XP tracking and lesson lock/unlock logic.
+ * Reads/writes to localStorage. No server needed.
+ */
 
-  // Figure out how many lessons are passed
-  let maxPassed = 0;
-  for (let i = 1; i <= TOTAL_LESSONS; i++) {
-    if (localStorage.getItem(`lesson${i}_passed`) === "true") {
-      maxPassed = i;
-    } else {
-      break;
+const Progress = (() => {
+  const XP_KEY        = "veil_xp";
+  const COMPLETED_KEY = "veil_completed";
+
+  function getXP() {
+    return parseInt(localStorage.getItem(XP_KEY) || "0", 10);
+  }
+
+  function addXP(amount) {
+    const current = getXP();
+    const next    = current + amount;
+    localStorage.setItem(XP_KEY, next);
+    return next;
+  }
+
+  function getCompleted() {
+    const raw = localStorage.getItem(COMPLETED_KEY);
+    return raw ? JSON.parse(raw) : [];
+  }
+
+  function markComplete(lessonId) {
+    const list = getCompleted();
+    if (!list.includes(lessonId)) {
+      list.push(lessonId);
+      localStorage.setItem(COMPLETED_KEY, JSON.stringify(list));
     }
   }
 
-  // Lock/unlock lesson links (works on index + lesson pages)
-  document.querySelectorAll("[data-lesson-link]").forEach(link => {
-    const n = parseInt(link.dataset.lessonLink, 10);
-
-    if (n <= maxPassed) {
-      link.classList.add("lesson-completed"); // ✅ finished
-    }
-
-    // Only allow user to go to lessons up to maxPassed + 1
-    if (n > maxPassed + 1) {
-      link.classList.add("lesson-locked");
-      link.addEventListener("click", (e) => {
-        e.preventDefault();
-        alert("Complete the previous lessons to unlock this one.");
-      });
-    }
-  });
-
-  // Handle footer "Next Lesson" button on lesson pages
-  const currentLessonEl = document.querySelector("[data-current-lesson]");
-  const nextBtn = document.getElementById("nextLessonBtn");
-
-  if (currentLessonEl && nextBtn) {
-    const n = parseInt(currentLessonEl.dataset.currentLesson, 10);
-    const isPassed = localStorage.getItem(`lesson${n}_passed`) === "true";
-
-    if (n >= TOTAL_LESSONS) {
-      // last lesson → hide button
-      nextBtn.style.display = "none";
-      return;
-    }
-
-    if (isPassed) {
-      nextBtn.disabled = false;
-      nextBtn.textContent = "Next lesson";
-      nextBtn.addEventListener("click", () => {
-        window.location.href = `lesson${n + 1}.html`;
-      });
-    } else {
-      nextBtn.disabled = true;
-      nextBtn.textContent = "Finish this quiz to unlock the next lesson";
-    }
+  function isComplete(lessonId) {
+    return getCompleted().includes(lessonId);
   }
-});
+
+  function isUnlocked(lessonId) {
+    if (lessonId <= 1) return true;
+    return isComplete(lessonId - 1);
+  }
+
+  /** Returns id of the next lesson after lessonId, or null if none */
+  function nextLesson(lessonId) {
+    const ids = LESSONS.map(l => l.id).sort((a, b) => a - b);
+    const idx = ids.indexOf(lessonId);
+    return idx >= 0 && idx < ids.length - 1 ? ids[idx + 1] : null;
+  }
+
+  return { getXP, addXP, getCompleted, markComplete, isComplete, isUnlocked, nextLesson };
+})();
