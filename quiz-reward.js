@@ -47,8 +47,8 @@ const Quiz = (() => {
         ${questions}
 
         <div class="quiz-address">
-          <label for="veilAddress">Your Veil address <span class="label-note">(to receive your reward)</span></label>
-          <input type="text" id="veilAddress" placeholder="bv1q... or sv1q..." autocomplete="off" spellcheck="false">
+          <label for="veilAddress">Your RingCT address <span class="label-note">(must start with sv addresses only)</span></label>
+          <input type="text" id="veilAddress" placeholder="sv1q… (RingCT address only)" autocomplete="off" spellcheck="false">
         </div>
 
         <button type="submit" class="btn-submit">Submit Quiz</button>
@@ -78,13 +78,19 @@ const Quiz = (() => {
         if (selected.value === q.answer) {
           correct++;
           questionEl.classList.add("correct");
-        } else {
+        } else if (address.length > 0) {
+      result.innerHTML = `<div class="result-pass">Quiz passed! Only RingCT addresses (sv1q…) are accepted. No payout sent.</div>`;
+      finalize(lesson, result, null);
+    } else {
           questionEl.classList.add("incorrect");
           // Reveal correct answer
           const correctLabel = questionEl.querySelector(`input[value="${q.answer}"]`)?.closest(".q-option");
           if (correctLabel) correctLabel.classList.add("reveal-correct");
         }
-      } else {
+      } else if (address.length > 0) {
+      result.innerHTML = `<div class="result-pass">Quiz passed! Only RingCT addresses (sv1q…) are accepted. No payout sent.</div>`;
+      finalize(lesson, result, null);
+    } else {
         questionEl.classList.add("unanswered");
       }
     });
@@ -114,9 +120,12 @@ const Quiz = (() => {
     // Disable form
     form.querySelectorAll("input, button").forEach(el => el.disabled = true);
 
-    // Attempt faucet payout if address provided
-    if (address.length >= 20) {
+    // Attempt faucet payout — RingCT stealth addresses only (sv1q…)
+    if (address.startsWith("sv1q") && address.length >= 20) {
       sendReward(address, 1, lesson, result);
+    } else if (address.length > 0) {
+      result.innerHTML = `<div class="result-pass">Quiz passed! Only RingCT addresses (sv1q…) are accepted. No payout sent.</div>`;
+      finalize(lesson, result, null);
     } else {
       finalize(lesson, result, null);
     }
@@ -138,7 +147,10 @@ const Quiz = (() => {
             ✓ ${data.amount} VEIL sent!<br>
             <span class="txid">txid: <a href="https://explorer.veil-project.com/tx/${data.txid}" target="_blank">${data.txid.slice(0, 24)}…</a></span>
           </div>`;
-      } else {
+      } else if (address.length > 0) {
+      result.innerHTML = `<div class="result-pass">Quiz passed! Only RingCT addresses (sv1q…) are accepted. No payout sent.</div>`;
+      finalize(lesson, result, null);
+    } else {
         resultEl.innerHTML = `
           <div class="result-pass">
             Quiz passed! Faucet note: ${data.error || "could not send at this time."}
