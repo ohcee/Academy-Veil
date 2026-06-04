@@ -22,7 +22,7 @@ const LESSONS = [
       { type: "ul", items: [
         "ProgPoW — 35% of daily blocks (GPU mining)",
         "RandomX — 10% of daily blocks (CPU mining)",
-        "SHA-256d — 5% of daily blocks (ASIC/FPGA mining)",
+        "SHA-256d — 5% of daily blocks",
         "Staking — 50% of daily blocks"
       ]},
       { type: "p", text: "This combination supports decentralization across different hardware types while rewarding both miners and stakers." }
@@ -188,7 +188,7 @@ const LESSONS = [
       { type: "h", text: "Exchanges" },
       { type: "p", text: "Veil is listed on a number of exchanges. Check veil-project.com for the current list. CEX purchases are fastest but require KYC." },
       { type: "h", text: "Mining" },
-      { type: "p", text: "Mine with your GPU (ProgPoW), CPU (RandomX), or ASIC (SHA-256d). Mining rewards go to your wallet address directly. See Lesson 9 for full mining setup." },
+      { type: "p", text: "Mine with your GPU (ProgPoW), CPU (RandomX), or specialized hardware (SHA-256d). Mining rewards go to your wallet address directly. See Lesson 9 for full mining setup." },
       { type: "h", text: "Staking" },
       { type: "p", text: "If you already hold Veil, staking earns additional VEIL passively. See Lesson 4." },
       { type: "h", text: "Veil Academy Faucet" },
@@ -219,39 +219,44 @@ const LESSONS = [
   },
   {
     id: 6,
-    title: "Basecoin vs Stealth vs RingCT",
-    summary: "Understanding Veil's three transaction types and when each is used.",
+    title: "Why RingCT Only?",
+    summary: "Veil is moving to RingCT-only. Here's why it matters and what it means for you.",
     xp: 75,
     body: [
-      { type: "p", text: "Veil has three coin/transaction types. They provide different levels of privacy." },
-      { type: "h", text: "Basecoin" },
-      { type: "p", text: "Transparent — amounts and addresses are visible on the blockchain. Similar to Bitcoin transactions. Avoid holding basecoin; convert to RingCT for full privacy." },
-      { type: "h", text: "Stealth (CT)" },
-      { type: "p", text: "Confidential Transaction outputs. Amounts are hidden but the transaction graph is still visible — an observer can see that a transaction occurred between two parties. An intermediate layer." },
-      { type: "h", text: "RingCT" },
-      { type: "p", text: "Maximum privacy. Both amounts and the sender's identity are hidden using ring signatures and Pedersen commitments. The recommended type for all Veil holdings. RingCT outputs are also required for staking." },
+      { type: "p", text: "Veil was originally designed with three coin types: basecoin (transparent), CT/stealth (amount-hiding), and RingCT (fully private). The project is actively moving toward RingCT as the sole transaction type." },
+      { type: "h", text: "The Problem with Multiple Types" },
+      { type: "p", text: "Having transparent and semi-transparent outputs in the same wallet weakens the overall privacy guarantees. Even if your own funds are in RingCT, the existence of basecoin and CT outputs on the network creates a smaller anonymity set and potential analysis vectors." },
+      { type: "h", text: "What RingCT-Only Means" },
+      { type: "ul", items: [
+        "All transactions send and receive as RingCT by default",
+        "Stealth addresses (sv1q…) are the only address type used",
+        "Basecoin and CT outputs that exist will auto-convert to RingCT",
+        "A cleaner, stronger, more uniform privacy model for everyone on the network"
+      ]},
+      { type: "h", text: "What You Should Do Now" },
+      { type: "p", text: "Ensure auto-convert is enabled in your wallet so any legacy outputs are converted to RingCT automatically. Only share your stealth address (sv1q…) with senders. Never use a basecoin address for receiving." },
       { type: "h", text: "Auto-Convert" },
-      { type: "p", text: "The wallet can be configured to automatically convert basecoin and CT outputs to RingCT on each block. Keeping all your balance in RingCT is best practice." }
+      { type: "p", text: "The wallet's auto-convert feature detects basecoin and CT outputs and converts them to RingCT on each new block. This happens in the background without any manual action required once enabled." }
     ],
     quiz: [
       {
-        prompt: "Which transaction type exposes amounts and addresses on-chain?",
-        options: { a: "RingCT", b: "CT (Stealth)", c: "Basecoin" },
-        answer: "c"
-      },
-      {
-        prompt: "CT (Stealth) hides which of the following?",
-        options: { a: "Transaction amounts only", b: "Both amounts and sender identity", c: "Nothing" },
-        answer: "a"
-      },
-      {
-        prompt: "Which type is required for staking?",
-        options: { a: "Basecoin", b: "RingCT", c: "CT" },
+        prompt: "Why does having multiple coin types weaken privacy?",
+        options: { a: "It increases fees", b: "It creates a smaller anonymity set and analysis vectors", c: "It slows down syncing" },
         answer: "b"
       },
       {
-        prompt: "What does auto-convert do?",
-        options: { a: "Sends your Veil to an exchange", b: "Converts basecoin and CT to RingCT automatically", c: "Converts RingCT to basecoin" },
+        prompt: "What address type should you use for receiving Veil?",
+        options: { a: "Basecoin address (bv1q…)", b: "Stealth address (sv1q…)", c: "Any address type is equally private" },
+        answer: "b"
+      },
+      {
+        prompt: "What does auto-convert do to legacy basecoin and CT outputs?",
+        options: { a: "Deletes them", b: "Locks them for 30 days", c: "Converts them to RingCT automatically" },
+        answer: "c"
+      },
+      {
+        prompt: "What is the goal of the RingCT-only direction?",
+        options: { a: "Reduce block size", b: "A uniform, stronger privacy model for all users", c: "Faster transaction confirmation" },
         answer: "b"
       }
     ]
@@ -269,7 +274,7 @@ const LESSONS = [
       { type: "ul", items: [
         "In the wallet: go to the Privacy tab or use the Mint action",
         "Select the amount to mint — choosing denominations wisely improves efficiency (see Lesson 8)",
-        "Wait for the mint to mature (200 confirmations before it's eligible to stake)",
+        "Wait for the mint to mature (1000 confirmations before it's eligible to stake)",
         "Once mature, the wallet will automatically attempt to stake with those mints"
       ]},
       { type: "p", text: "Minting is a one-way step within a session — mints cannot be 'unminted' back into transparent outputs without spending them." }
@@ -277,7 +282,7 @@ const LESSONS = [
     quiz: [
       {
         prompt: "How many confirmations must a mint reach before it can stake?",
-        options: { a: "6", b: "100", c: "200" },
+        options: { a: "200", b: "500", c: "1000" },
         answer: "c"
       },
       {
@@ -303,11 +308,13 @@ const LESSONS = [
     summary: "Why denomination choice affects transaction fees and staking efficiency.",
     xp: 75,
     body: [
-      { type: "p", text: "RingCT mints come in fixed denominations. Choosing the right denomination mix matters for both fee efficiency and staking performance." },
+      { type: "p", text: "RingCT mints come in fixed Zerocoin denominations. Choosing the right denomination mix matters for both fee efficiency and staking performance." },
       { type: "h", text: "Available Denominations" },
       { type: "ul", items: [
-        "0.05 VEIL", "0.1 VEIL", "0.5 VEIL", "1 VEIL", "10 VEIL",
-        "100 VEIL", "1,000 VEIL", "10,000 VEIL", "100,000 VEIL"
+        "10 VEIL",
+        "100 VEIL",
+        "1,000 VEIL",
+        "10,000 VEIL"
       ]},
       { type: "h", text: "Why It Matters" },
       { type: "p", text: "Larger denominations mean fewer mints to manage — lower fees when spending, less blockchain data, and simpler UTXO sets. However, very large denominations can be inefficient if you need to make change frequently." },
@@ -315,8 +322,8 @@ const LESSONS = [
     ],
     quiz: [
       {
-        prompt: "What is the largest available RingCT denomination?",
-        options: { a: "10,000 VEIL", b: "100,000 VEIL", c: "1,000,000 VEIL" },
+        prompt: "What is the largest available Zerocoin denomination?",
+        options: { a: "1,000 VEIL", b: "10,000 VEIL", c: "100,000 VEIL" },
         answer: "b"
       },
       {
@@ -330,9 +337,9 @@ const LESSONS = [
         answer: "b"
       },
       {
-        prompt: "What is the smallest available denomination?",
-        options: { a: "0.01 VEIL", b: "0.05 VEIL", c: "0.1 VEIL" },
-        answer: "b"
+        prompt: "What is the smallest available Zerocoin denomination?",
+        options: { a: "1 VEIL", b: "5 VEIL", c: "10 VEIL" },
+        answer: "c"
       }
     ]
   },
@@ -344,17 +351,17 @@ const LESSONS = [
     body: [
       { type: "p", text: "Veil supports three PoW algorithms simultaneously. Each targets different hardware, promoting mining decentralization." },
       { type: "h", text: "ProgPoW (GPU)" },
-      { type: "p", text: "Programmatic Proof-of-Work. Designed to leverage the full capabilities of consumer GPUs. Produces 35% of daily blocks. Nvidia and AMD GPUs both work. Use miners like T-Rex or TeamRedMiner." },
+      { type: "p", text: "Programmatic Proof-of-Work. Designed to leverage the full capabilities of consumer GPUs and resist ASIC optimization. Produces 35% of daily blocks. Both Nvidia and AMD GPUs are supported. The recommended miner is T-Rex (Nvidia) or use a pool-recommended miner for AMD." },
       { type: "h", text: "RandomX (CPU)" },
-      { type: "p", text: "CPU-optimized algorithm using random code execution. Produces 10% of daily blocks. CPUs with large L3 cache perform best (AMD Ryzen/EPYC preferred). Use XMRig." },
-      { type: "h", text: "SHA-256d (ASIC)" },
-      { type: "p", text: "Bitcoin-compatible SHA-256 double. Produces 5% of daily blocks. Standard Bitcoin ASICs can mine this algorithm." },
+      { type: "p", text: "CPU-optimized algorithm using random code execution and memory-hardness. Produces 10% of daily blocks. CPUs with large L3 cache perform best — AMD Ryzen and EPYC processors have a strong advantage. The recommended miner is XMRig." },
+      { type: "h", text: "SHA-256d" },
+      { type: "p", text: "Veil's SHA-256d is a double SHA-256 variant but it is not the same as Bitcoin's SHA-256. Standard Bitcoin ASICs are not compatible. Veil's SHA-256d has its own specific requirements — check veil-project.com and the mining community for currently compatible hardware and miners." },
       { type: "h", text: "Solo vs Pool" },
-      { type: "p", text: "Solo mining sends rewards directly to your wallet with no pool fees, but variance is high — you may go long periods without a block. Pool mining smooths rewards. Check veil-stats.com for active pools." }
+      { type: "p", text: "Solo mining sends rewards directly to your wallet with no pool fees, but variance is high — you may go long periods without finding a block. Pool mining smooths out rewards. Check veil-stats.com for active pools across all three algorithms." }
     ],
     quiz: [
       {
-        prompt: "Which algorithm is designed for GPU mining?",
+        prompt: "Which algorithm is designed for GPU mining and ASIC resistance?",
         options: { a: "RandomX", b: "SHA-256d", c: "ProgPoW" },
         answer: "c"
       },
@@ -364,13 +371,13 @@ const LESSONS = [
         answer: "b"
       },
       {
-        prompt: "Which CPU brand has an edge in RandomX due to larger L3 cache?",
+        prompt: "Which CPU brand has an advantage in RandomX due to larger L3 cache?",
         options: { a: "Intel", b: "AMD", c: "Qualcomm" },
         answer: "b"
       },
       {
-        prompt: "What is the main tradeoff with solo mining vs pool mining?",
-        options: { a: "Solo has higher fees", b: "Solo has higher reward variance", c: "Pool mining requires more hardware" },
+        prompt: "Can standard Bitcoin ASICs mine Veil's SHA-256d?",
+        options: { a: "Yes, they are fully compatible", b: "No, Veil's SHA-256d has different requirements", c: "Only older Bitcoin ASICs work" },
         answer: "b"
       }
     ]
@@ -393,7 +400,7 @@ const LESSONS = [
       { type: "ul", items: [
         "Keep the wallet running 24/7 — you can't stake when offline",
         "More minted balance = more attempts per block = more wins",
-        "Ensure all mints have 200+ confirmations (immature mints don't stake)",
+        "Ensure all mints have 1000+ confirmations (immature mints don't stake)",
         "Use a stable power connection — unexpected shutdowns can delay staking"
       ]},
       { type: "p", text: "Staking rewards are added as new RingCT mints to your wallet and are immediately eligible after maturing." }
@@ -416,8 +423,8 @@ const LESSONS = [
       },
       {
         prompt: "How many confirmations must a mint have to be eligible for staking?",
-        options: { a: "6", b: "200", c: "1000" },
-        answer: "b"
+        options: { a: "200", b: "500", c: "1000" },
+        answer: "c"
       }
     ]
   },
