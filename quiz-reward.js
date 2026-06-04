@@ -1,196 +1,212 @@
-// ===== XP bar on every page =====
-const xpEl = document.getElementById("xpBar");
-if (xpEl) {
-  const xp = parseInt(localStorage.getItem("xp") || "0", 10);
-  xpEl.innerText = "XP: " + xp;
-}
+/**
+ * quiz-reward.js
+ * Handles quiz rendering, scoring, faucet payout, XP award, and lesson unlock.
+ * Expects: LESSONS, Progress (from progress.js), confetti (from CDN)
+ *
+ * FAUCET_URL: update to your live API endpoint before deploying the backend.
+ */
 
-// ===== Settings =====
-const XP_UNLOCK = 10;      // need this much XP before ANY VEIL payouts
-const DAILY_CAP = 10;      // max VEIL per browser/day (frontend guard)
+const FAUCET_URL = "https://your-server.example.com/api/sendVeil";
+// ↑ Replace with your actual faucet server URL once deployed.
+// While testing locally you can use: "http://127.0.0.1:5000/api/sendVeil"
 
-// ===== Daily reward limiter =====
-function getToday() {
-  return new Date().toISOString().split("T")[0];
-}
+const Quiz = (() => {
 
-function canRewardToday(amount) {
-  const today = getToday();
-  const lastDate = localStorage.getItem("veilLastRewardDate");
-  let totalToday = parseInt(localStorage.getItem("veilDailyTotal") || "0", 10);
+  // ── Render quiz form for a given lesson object ──────────────────────────
+  function render(lesson, containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
 
-  if (lastDate !== today) {
-    localStorage.setItem("veilLastRewardDate", today);
-    localStorage.setItem("veilDailyTotal", "0");
-    totalToday = 0;
-  }
-
-  return totalToday + amount <= DAILY_CAP;
-}
-
-function updateDailyTotal(amount) {
-  const current = parseInt(localStorage.getItem("veilDailyTotal") || "0", 10);
-  localStorage.setItem("veilDailyTotal", current + amount);
-}
-
-// 1 XP per correct answer
-function getRewardAmount(score) {
-  return score; // 1 XP / 1 potential VEIL per correct question
-}
-
-// ===== Main quiz handler =====
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("quizForm");
-  if (!form) return;
-
-  const correctAnswers = window.quizAnswers || {};
-  const addressInput = document.getElementById("veilAddress");
-  const lessonId = form.getAttribute("data-lesson"); // e.g. "lesson2"
-
-  // On load, enable/disable address field based on current XP
-  let currentXp = parseInt(localStorage.getItem("xp") || "0", 10);
-  if (addressInput) {
-    if (currentXp < XP_UNLOCK) {
-      addressInput.disabled = true;
-      addressInput.placeholder = `Reach ${XP_UNLOCK} XP to unlock Veil rewards.`;
-    } else {
-      addressInput.disabled = false;
-      if (!addressInput.placeholder) {
-        addressInput.placeholder = "Enter your Veil address";
-      }
-    }
-  }
-
-  form.onsubmit = function (e) {
-    e.preventDefault();
-
-    const result = document.getElementById("result");
-    if (!result) return;
-
-    // ----- Score the quiz -----
-    let score = 0;
-    for (let q in correctAnswers) {
-      const selected = document.querySelector(`input[name="${q}"]:checked`);
-      if (selected && selected.value === correctAnswers[q]) {
-        score++;
-      }
-    }
-
-    if (score === 0) {
-      result.innerText = "You didn not get any right. Try again!";
-      result.style.color = "#ff5555";
+    // If already completed, show a done state instead
+    if (Progress.isComplete(lesson.id)) {
+      container.innerHTML = `
+        <div class="quiz-done">
+          <div class="quiz-done-icon">✓</div>
+          <p>You've already completed this lesson.</p>
+          ${nextBtn(lesson.id)}
+        </div>`;
       return;
     }
 
-    // Mark lesson as passed as soon as they get > 0 correct
-    if (lessonId) {
-      localStorage.setItem(lessonId + "_passed", "true");
-    }
+    const questions = lesson.quiz.map((q, i) => `
+      <div class="quiz-question" id="q${i}">
+        <p class="q-prompt">${i + 1}. ${q.prompt}</p>
+        <div class="q-options">
+          ${Object.entries(q.options).map(([key, val]) => `
+            <label class="q-option">
+              <input type="radio" name="q${i}" value="${key}">
+              <span>${val}</span>
+            </label>
+          `).join("")}
+        </div>
+      </div>
+    `).join("");
 
-    const reward = getRewardAmount(score); // points gained this quiz
+    container.innerHTML = `
+      <form id="quizForm" class="quiz-form" novalidate>
+        ${questions}
 
-    // ----- XP update -----
-    const xpBefore = parseInt(localStorage.getItem("xp") || "0", 10);
-    const xpAfter = xpBefore + reward;
-    localStorage.setItem("xp", xpAfter);
-    if (xpEl) {
-      xpEl.innerText = "XP: " + xpAfter;
-    }
+        <div class="quiz-address">
+          <label for="veilAddress">Your Veil address <span class="label-note">(to receive your reward)</span></label>
+          <input type="text" id="veilAddress" placeholder="bv1q... or sv1q..." autocomplete="off" spellcheck="false">
+        </div>
 
-    // If they haven't reached XP_UNLOCK *before this quiz*, it's XP-only
-    if (xpBefore < XP_UNLOCK) {
-      if (addressInput) {
-        addressInput.disabled = true;
-        addressInput.value = "";
-        addressInput.placeholder = `Reach ${XP_UNLOCK} XP to unlock Veil rewards.`;
-      }
+        <button type="submit" class="btn-submit">Submit Quiz</button>
+        <div id="quizResult" class="quiz-result hidden"></div>
+      </form>`;
 
-      // If this quiz pushed them over the line, tell them that
-      if (xpAfter >= XP_UNLOCK) {
-        result.innerText =
-          `You earned ${reward} XP and reached ${xpAfter} XP total. ` +
-          `From your next quiz onward, you can enter a Veil address to earn up to ${DAILY_CAP} VEIL per day.`;
+    document.getElementById("quizForm").addEventListener("submit", e => {
+      e.preventDefault();
+      handleSubmit(lesson);
+    });
+  }
+
+  // ── Score submission ─────────────────────────────────────────────────────
+  function handleSubmit(lesson) {
+    const form    = document.getElementById("quizForm");
+    const result  = document.getElementById("quizResult");
+    const address = (document.getElementById("veilAddress")?.value || "").trim();
+
+    // Score
+    let correct = 0;
+    const total = lesson.quiz.length;
+
+    lesson.quiz.forEach((q, i) => {
+      const selected = form.querySelector(`input[name="q${i}"]:checked`);
+      const questionEl = document.getElementById(`q${i}`);
+      if (selected) {
+        if (selected.value === q.answer) {
+          correct++;
+          questionEl.classList.add("correct");
+        } else {
+          questionEl.classList.add("incorrect");
+          // Reveal correct answer
+          const correctLabel = questionEl.querySelector(`input[value="${q.answer}"]`)?.closest(".q-option");
+          if (correctLabel) correctLabel.classList.add("reveal-correct");
+        }
       } else {
-        result.innerText =
-          `You earned ${reward} XP. Keep going — rewards unlock at ${XP_UNLOCK} XP.`;
+        questionEl.classList.add("unanswered");
       }
-      result.style.color = "#00ff99";
+    });
+
+    const passed = correct === total;
+    result.classList.remove("hidden");
+
+    if (!passed) {
+      result.innerHTML = `
+        <div class="result-fail">
+          <strong>${correct}/${total} correct.</strong> Review the highlighted questions and try again.
+        </div>`;
+      // Reset for retry — remove old class markings after a moment
+      setTimeout(() => {
+        form.querySelectorAll(".quiz-question").forEach(el => {
+          el.classList.remove("correct", "incorrect", "unanswered");
+          el.querySelectorAll(".reveal-correct").forEach(l => l.classList.remove("reveal-correct"));
+        });
+        result.classList.add("hidden");
+      }, 3500);
       return;
     }
 
-    // At this point, xpBefore >= XP_UNLOCK → they were eligible when they started this quiz
-    if (addressInput) {
-      addressInput.disabled = false;
-      if (!addressInput.placeholder ||
-          addressInput.placeholder.includes("Reach")) {
-        addressInput.placeholder = "Enter your Veil address";
-      }
+    // ── Passed ───────────────────────────────────────────────────────────
+    result.innerHTML = `<div class="result-pass">All correct! Sending your reward…</div>`;
+
+    // Disable form
+    form.querySelectorAll("input, button").forEach(el => el.disabled = true);
+
+    // Attempt faucet payout if address provided
+    if (address.length >= 20) {
+      sendReward(address, 1, lesson, result);
+    } else {
+      finalize(lesson, result, null);
     }
+  }
 
-    const address = addressInput ? addressInput.value.trim() : "";
-
-    if (!address) {
-      result.innerText = "Enter your Veil address to receive rewards.";
-      result.style.color = "#ffcc00";
-      return;
-    }
-
-    if (address.length < 20) {
-      result.innerText = "Please enter a valid Veil address.";
-      result.style.color = "#ff5555";
-      return;
-    }
-
-    // Check daily cap before calling backend
-    if (!canRewardToday(reward)) {
-      result.innerText =
-        `You have reached the ${DAILY_CAP} VEIL daily reward cap. ` +
-        "You can still practice quizzes, but no more payouts today.";
-      result.style.color = "#ffcc00";
-      return;
-    }
-
-    // ----- Attempt to send reward via backend -----
-    fetch("http://localhost:5000/api/sendVeil", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ address: address, amount: reward }),
-    })
-      .then((res) => res.text())
-      .then((txt) => {
-        const lower = txt.toLowerCase();
-
-        // If backend mentions caps/limits, show that message only
-        if (
-          lower.includes("cap") ||
-          lower.includes("limit") ||
-          lower.includes("tomorrow")
-        ) {
-          result.innerText = txt;
-          result.style.color = "#ffcc00";
-          return;
-        }
-
-        // Backend accepted → update daily total and show success
-        updateDailyTotal(reward);
-
-        result.innerText = `You earned ${reward} VEIL! ${txt}`;
-        result.style.color = "#00ff99";
-
-        // confetti only on actual payout
-        if (typeof confetti === "function") {
-          confetti({
-            particleCount: 80,
-            spread: 60,
-            origin: { y: 0.6 },
-          });
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        result.innerText =
-          "You passed the quiz, but there was a problem sending the reward. Please try again later.";
-        result.style.color = "#ff5555";
+  // ── Faucet call ──────────────────────────────────────────────────────────
+  async function sendReward(address, amount, lesson, resultEl) {
+    try {
+      const resp = await fetch(FAUCET_URL, {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ address, amount })
       });
-  };
-});
+      const data = await resp.json();
+
+      if (data.success && data.txid) {
+        resultEl.innerHTML = `
+          <div class="result-pass">
+            ✓ ${data.amount} VEIL sent!<br>
+            <span class="txid">txid: <a href="https://explorer.veil-project.com/tx/${data.txid}" target="_blank">${data.txid.slice(0, 24)}…</a></span>
+          </div>`;
+      } else {
+        resultEl.innerHTML = `
+          <div class="result-pass">
+            Quiz passed! Faucet note: ${data.error || "could not send at this time."}
+          </div>`;
+      }
+    } catch {
+      resultEl.innerHTML = `
+        <div class="result-pass">
+          Quiz passed! Faucet is offline — reward will be sent manually.
+        </div>`;
+    }
+
+    finalize(lesson, resultEl, null);
+  }
+
+  // ── Award XP, mark complete, show next button ────────────────────────────
+  function finalize(lesson, resultEl, _unused) {
+    if (!Progress.isComplete(lesson.id)) {
+      const newXP = Progress.addXP(lesson.xp);
+      Progress.markComplete(lesson.id);
+
+      // XP flash
+      const xpFlash = document.createElement("div");
+      xpFlash.className = "xp-flash";
+      xpFlash.textContent = `+${lesson.xp} XP`;
+      document.body.appendChild(xpFlash);
+      setTimeout(() => xpFlash.remove(), 2000);
+
+      // Refresh XP bar in header
+      refreshXPBar(newXP);
+    }
+
+    // Confetti
+    if (typeof confetti === "function") {
+      confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors: ["#00d4ff", "#7c3aed", "#ffffff"] });
+    }
+
+    // Next lesson button
+    const nextId = Progress.nextLesson(lesson.id);
+    const form   = document.getElementById("quizForm");
+    const nextHTML = nextId
+      ? `<a href="lesson.html?id=${nextId}" class="btn-next">Next Lesson →</a>`
+      : `<a href="index.html" class="btn-next">Back to Home</a>`;
+
+    const btnRow = document.createElement("div");
+    btnRow.className = "quiz-next-row";
+    btnRow.innerHTML = nextHTML;
+    form.appendChild(btnRow);
+  }
+
+  // ── Update XP bar without full page reload ───────────────────────────────
+  function refreshXPBar(xp) {
+    const total = typeof totalXP === "function" ? totalXP() : 0;
+    const pct   = total > 0 ? Math.round((xp / total) * 100) : 0;
+    const val   = document.querySelector(".xp-val");
+    const fill  = document.querySelector(".xp-fill");
+    const pctEl = document.querySelector(".xp-pct");
+    if (val)   val.textContent   = `${xp} XP`;
+    if (fill)  fill.style.width  = `${pct}%`;
+    if (pctEl) pctEl.textContent = `${pct}%`;
+  }
+
+  function nextBtn(lessonId) {
+    const nextId = Progress.nextLesson(lessonId);
+    return nextId
+      ? `<a href="lesson.html?id=${nextId}" class="btn-next">Next Lesson →</a>`
+      : `<a href="index.html" class="btn-next">Back to Home</a>`;
+  }
+
+  return { render };
+})();
