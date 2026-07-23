@@ -4,6 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="lesson-id" content="0">
+
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'self';
+               script-src 'self';
+               style-src 'self' 'unsafe-inline';
+               img-src 'self' data:;
+               connect-src 'self' https: http://localhost:* http://127.0.0.1:*;
+               form-action 'none';
+               frame-ancestors 'none';
+               base-uri 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="Learn how Veil's privacy, staking, and mining actually work — then earn real Veil by passing the quizzes.">
+
 <title>Veil Academy</title>
 <link rel="stylesheet" href="style.css">
 <link rel="icon" href="veil-logo.png">
@@ -14,7 +27,6 @@
 
 <main class="home-main">
 
-  <!-- Hero -->
   <section class="hero">
     <img src="veil-logo.png" alt="Veil" class="hero-logo">
     <h1 class="hero-title">Veil <span class="accent">Academy</span></h1>
@@ -26,7 +38,6 @@
     </div>
   </section>
 
-  <!-- Lesson grid -->
   <section class="grid-section">
     <div class="lesson-grid" id="lessonGrid"></div>
   </section>
@@ -35,55 +46,21 @@
 
 <footer class="site-footer">
   <div class="footer-inner">
-    <a href="https://veil-project.com" target="_blank">Website</a>
-    <a href="https://github.com/Veil-Project/veil/releases" target="_blank">Wallet</a>
-    <a href="https://veil.tools" target="_blank">Snapshot</a>
-    <a href="https://veil-stats.com" target="_blank">Stats</a>
-    <a href="https://explorer.veil-project.com/main" target="_blank">Explorer</a>
-    <a href="https://veil-info.org" target="_blank">Veil Info</a>
-    <a href="https://github.com/Veil-Project/veil" target="_blank">GitHub</a>
+    <a href="https://veil-project.com" target="_blank" rel="noopener noreferrer">Website</a>
+    <a href="https://github.com/Veil-Project/veil/releases" target="_blank" rel="noopener noreferrer">Wallet</a>
+    <a href="https://veil.tools" target="_blank" rel="noopener noreferrer">Snapshot</a>
+    <a href="https://veil-stats.com" target="_blank" rel="noopener noreferrer">Stats</a>
+    <a href="https://explorer.veil-project.com/main" target="_blank" rel="noopener noreferrer">Explorer</a>
+    <a href="https://veil-info.org" target="_blank" rel="noopener noreferrer">Veil Info</a>
+    <a href="https://github.com/Veil-Project/veil" target="_blank" rel="noopener noreferrer">GitHub</a>
   </div>
 </footer>
 
+<script src="config.js"></script>
 <script src="lessons.js"></script>
 <script src="progress.js"></script>
 <script src="nav.js"></script>
-
-<script>
-(function () {
-  const completed = Progress.getCompleted();
-  const xp        = Progress.getXP();
-
-  // Hero stats
-  document.getElementById("statLessons").textContent = LESSONS.length;
-  document.getElementById("statXP").textContent      = xp;
-  document.getElementById("statDone").textContent    = completed.length;
-
-  // Build lesson grid dynamically from LESSONS data
-  const grid = document.getElementById("lessonGrid");
-  grid.innerHTML = LESSONS.map(lesson => {
-    const isDone    = completed.includes(lesson.id);
-    const isLocked  = !Progress.isUnlocked(lesson.id);
-    const cls = ["lesson-card", isDone ? "card-done" : "", isLocked ? "card-locked" : ""].filter(Boolean).join(" ");
-
-    return `
-      <a href="${isLocked ? "#" : "lesson.html?id=" + lesson.id}"
-         class="${cls}"
-         ${isLocked ? 'onclick="return false"' : ""}>
-        <div class="card-num">${String(lesson.id).padStart(2, "0")}</div>
-        <div class="card-body">
-          <strong class="card-title">${lesson.title}</strong>
-          <span class="card-summary">${lesson.summary}</span>
-        </div>
-        <div class="card-meta">
-          <span class="card-xp">${lesson.xp} XP</span>
-          ${isDone   ? '<span class="card-badge done">✓ Done</span>' : ""}
-          ${isLocked ? '<span class="card-badge locked">🔒</span>'  : ""}
-        </div>
-      </a>`;
-  }).join("");
-})();
-</script>
+<script src="page-home.js"></script>
 
 </body>
 </html>

@@ -3,7 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="lesson-id" content="0"> <!-- updated by JS below -->
+<meta name="lesson-id" content="0"> <!-- set by page-lesson.js -->
+
+<!--
+  No inline script anywhere on this site, so script-src can stay at 'self'.
+  connect-src allows https: because the faucet origin is configurable in
+  config.js; everything else is locked to this origin. There are deliberately
+  no third-party requests on any page.
+-->
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'self';
+               script-src 'self';
+               style-src 'self' 'unsafe-inline';
+               img-src 'self' data:;
+               connect-src 'self' https: http://localhost:* http://127.0.0.1:*;
+               form-action 'none';
+               frame-ancestors 'none';
+               base-uri 'none'">
+<meta name="referrer" content="no-referrer">
+
 <title>Veil Academy</title>
 <link rel="stylesheet" href="style.css">
 <link rel="icon" href="veil-logo.png">
@@ -15,14 +33,12 @@
 <main class="lesson-main">
   <div class="lesson-container">
 
-    <!-- Breadcrumb -->
     <div class="breadcrumb">
       <a href="index.html">Academy</a>
       <span class="crumb-sep">›</span>
       <span id="crumbTitle">Lesson</span>
     </div>
 
-    <!-- Lesson header -->
     <div class="lesson-hdr">
       <div class="lesson-num-badge" id="lessonNumBadge">01</div>
       <div>
@@ -32,15 +48,12 @@
       <div class="lesson-xp-badge" id="lessonXPBadge"><span></span> XP</div>
     </div>
 
-    <!-- Lesson body -->
     <article class="lesson-body" id="lessonBody"></article>
 
-    <!-- Divider -->
     <div class="quiz-divider">
       <span>QUIZ</span>
     </div>
 
-    <!-- Quiz -->
     <div id="quizContainer"></div>
 
   </div>
@@ -48,72 +61,23 @@
 
 <footer class="site-footer">
   <div class="footer-inner">
-    <a href="https://veil-project.com" target="_blank">Website</a>
-    <a href="https://github.com/Veil-Project/veil/releases" target="_blank">Wallet</a>
-    <a href="https://veil.tools" target="_blank">Snapshot</a>
-    <a href="https://veil-stats.com" target="_blank">Stats</a>
-    <a href="https://explorer.veil-project.com/main" target="_blank">Explorer</a>
-    <a href="https://veil-info.org" target="_blank">Veil Info</a>
-    <a href="https://github.com/Veil-Project/veil" target="_blank">GitHub</a>
+    <a href="https://veil-project.com" target="_blank" rel="noopener noreferrer">Website</a>
+    <a href="https://github.com/Veil-Project/veil/releases" target="_blank" rel="noopener noreferrer">Wallet</a>
+    <a href="https://veil.tools" target="_blank" rel="noopener noreferrer">Snapshot</a>
+    <a href="https://veil-stats.com" target="_blank" rel="noopener noreferrer">Stats</a>
+    <a href="https://explorer.veil-project.com/main" target="_blank" rel="noopener noreferrer">Explorer</a>
+    <a href="https://veil-info.org" target="_blank" rel="noopener noreferrer">Veil Info</a>
+    <a href="https://github.com/Veil-Project/veil" target="_blank" rel="noopener noreferrer">GitHub</a>
   </div>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script src="config.js"></script>
+<script src="confetti.js"></script>
 <script src="lessons.js"></script>
 <script src="progress.js"></script>
 <script src="quiz-reward.js"></script>
 <script src="nav.js"></script>
-
-<script>
-(function () {
-  const params   = new URLSearchParams(window.location.search);
-  const id       = parseInt(params.get("id") || "1", 10);
-  const lesson   = getLessonById(id);
-
-  if (!lesson) {
-    document.getElementById("lessonTitle").textContent = "Lesson not found.";
-    return;
-  }
-
-  // Update meta lesson-id for nav.js
-  document.querySelector("meta[name='lesson-id']").content = id;
-  document.title = `Lesson ${id}: ${lesson.title} — Veil Academy`;
-
-  // Breadcrumb + header
-  document.getElementById("crumbTitle").textContent  = `Lesson ${id}`;
-  document.getElementById("lessonNumBadge").textContent = String(id).padStart(2, "0");
-  document.getElementById("lessonTitle").textContent  = lesson.title;
-  document.getElementById("lessonSummary").textContent = lesson.summary;
-  document.getElementById("lessonXPBadge").querySelector("span").textContent = lesson.xp;
-
-  // Build body
-  const bodyEl = document.getElementById("lessonBody");
-  bodyEl.innerHTML = lesson.body.map(block => {
-    switch (block.type) {
-      case "p":  return `<p>${block.text}</p>`;
-      case "h":  return `<h3>${block.text}</h3>`;
-      case "ul": return `<ul>${block.items.map(i => `<li>${i}</li>`).join("")}</ul>`;
-      default:   return "";
-    }
-  }).join("");
-
-  // Check locked
-  if (!Progress.isUnlocked(id)) {
-    const lock = document.createElement("div");
-    lock.className = "locked-overlay";
-    lock.innerHTML = `
-      <div class="locked-msg">
-        <div class="locked-icon">🔒</div>
-        <p>Complete <a href="lesson.html?id=${id - 1}">Lesson ${id - 1}</a> to unlock this lesson.</p>
-      </div>`;
-    document.getElementById("quizContainer").appendChild(lock);
-    return;
-  }
-
-  // Render quiz
-  Quiz.render(lesson, "quizContainer");
-})();
-</script>
+<script src="page-lesson.js"></script>
 
 </body>
 </html>

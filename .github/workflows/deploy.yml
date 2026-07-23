@@ -3,6 +3,8 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -15,7 +17,65 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Catch broken content before it reaches the live site. The answer key is not
+  # in the repo, so this runs the structural checks only (--no-answers): valid
+  # lesson ids, well-formed quizzes, and — importantly — that no `answer` field
+  # has crept back into lessons.js, which ships to the browser.
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check JavaScript parses
+        run: |
+          for f in lessons.js progress.js nav.js quiz-reward.js \
+                   config.js confetti.js page-home.js page-lesson.js; do
+            node --check "$f"
+          done
+
+      - name: Validate lesson content
+        run: python3 check_content.py --no-answers
+
+      - name: Check for third-party requests
+        run: |
+          # Every *loaded* asset must be same-origin, or the browser reveals the
+          # visitor's IP to a third party on page load. Ordinary <a href> links
+          # are fine — those are navigations the reader chooses to make.
+          fail=0
+
+          if grep -rnE '<(script|img|iframe)[^>]+src="https?://' index.html lesson.html; then
+            echo "::error::External script/img/iframe — self-host it."
+            fail=1
+          fi
+
+          if grep -rnE '<link[^>]+href="https?://' index.html lesson.html; then
+            echo "::error::External stylesheet or font link — self-host it."
+            fail=1
+          fi
+
+          # Strip comments before looking for @import, so the comment explaining
+          # why there is no @import does not trip the check.
+          if sed 's://.*::g' style.css | perl -0777 -pe 's{/\*.*?\*/}{}gs' | grep -nE '^\s*@import'; then
+            echo "::error::@import in style.css pulls a remote asset — self-host it."
+            fail=1
+          fi
+
+          [ "$fail" -eq 0 ] && echo "No third-party asset references found."
+          exit $fail
+
+      - name: Check the answer key was not committed
+        run: |
+          if [ -f answers.json ]; then
+            echo "::error::answers.json is committed. This repo is public — the"
+            echo "::error::quiz answer key must live only on the faucet server."
+            exit 1
+          fi
+          echo "Answer key correctly absent from the repo."
+
   deploy:
+    needs: validate
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -31,8 +91,8 @@ jobs:
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload the entire repo root (all HTML, CSS, JS, images)
-          # api.py is excluded automatically since Pages only serves static files
+          # The whole repo root. Pages serves static files only, so api.py and
+          # the Python helpers are inert here.
           path: .
 
       - name: Deploy to GitHub Pages

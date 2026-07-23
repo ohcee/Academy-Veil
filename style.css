@@ -3,7 +3,16 @@
    Dark terminal aesthetic. Teal/cyan accent. Sharp geometry.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;500;600&display=swap');
+/* No webfont @import here on purpose.
+   Pulling fonts from fonts.googleapis.com sends every visitor's IP address,
+   user agent and referring page to Google on every page load. On a site whose
+   whole subject is network privacy, that is not defensible — and the CSP in
+   index.html / lesson.html blocks it anyway.
+
+   The stacks below use the original fonts when the visitor happens to have them
+   installed locally, and fall back to good system faces otherwise. To restore
+   the exact original typography, self-host the woff2 files in a fonts/ folder
+   and add @font-face rules here — no third-party request needed. */
 
 /* ── Variables ────────────────────────────────────────────────────────────── */
 :root {
@@ -28,8 +37,10 @@
   --warn:       #f59e0b;
   --danger:     #ef4444;
 
-  --font-mono:  'Share Tech Mono', 'Courier New', monospace;
-  --font-sans:  'Barlow', system-ui, sans-serif;
+  --font-mono:  'Share Tech Mono', ui-monospace, 'SF Mono', 'Cascadia Mono',
+                'Roboto Mono', Menlo, Consolas, 'Courier New', monospace;
+  --font-sans:  'Barlow', system-ui, -apple-system, 'Segoe UI', Roboto,
+                'Helvetica Neue', Arial, sans-serif;
 
   --radius:     6px;
   --radius-lg:  10px;
@@ -778,4 +789,99 @@ body::after {
   );
   pointer-events: none;
   z-index: 9999;
+}
+
+/* ── Lesson callouts, code blocks and sources ─────────────────────────────── */
+
+.lesson-note {
+  margin: 22px 0;
+  padding: 16px 20px;
+  background: var(--accent-glow);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  color: var(--text);
+  font-size: 14.5px;
+  line-height: 1.7;
+}
+
+.lesson-code {
+  margin: 20px 0;
+  padding: 14px 18px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow-x: auto;
+}
+.lesson-code code {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  white-space: pre;
+}
+
+.lesson-sources {
+  margin-top: 40px;
+  padding-top: 22px;
+  border-top: 1px solid var(--border);
+}
+.lesson-sources h4 {
+  margin-bottom: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text3);
+}
+.lesson-sources ul { list-style: none; padding: 0; margin: 0; }
+.lesson-sources ul li { margin-bottom: 8px; padding-left: 0; }
+.lesson-sources ul li::before { content: none; }
+.lesson-sources a {
+  color: var(--text2);
+  font-size: 13px;
+  text-decoration: none;
+  border-bottom: 1px dotted var(--border2);
+  transition: color var(--transition);
+}
+.lesson-sources a:hover { color: var(--accent); }
+
+/* ── Quiz: pending state, address help, payout notes ──────────────────────── */
+
+.result-pending {
+  padding: 16px 20px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  color: var(--text2);
+  font-size: 15px;
+}
+
+.addr-help {
+  margin-top: 8px;
+  color: var(--text3);
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.payout-note {
+  display: block;
+  margin-top: 8px;
+  color: var(--text2);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* Server-marked questions */
+.quiz-question.correct   { border-left: 3px solid var(--done); }
+.quiz-question.incorrect { border-left: 3px solid var(--danger); }
+.quiz-question.unanswered{ border-left: 3px solid var(--warn); }
+
+.study-mode-note {
+  margin-bottom: 24px;
+  padding: 14px 18px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  color: var(--text2);
+  font-size: 13.5px;
+  line-height: 1.6;
 }
