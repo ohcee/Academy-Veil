@@ -60,7 +60,7 @@
       <span class="xp-total">/ ${total} XP</span>
     </div>
     <div class="xp-track">
-      <div class="xp-fill" style="width:${pct}%"></div>
+      <div class="xp-fill"></div>
     </div>
     <span class="xp-pct">${pct}%</span>
   </div>
@@ -76,6 +76,15 @@
     const container = document.createElement("div");
     container.innerHTML = buildNav(currentId);
     document.body.insertBefore(container.firstElementChild, document.body.firstChild);
+
+    // Set the bar width via the CSSOM rather than a style="" attribute, so the
+    // page's Content-Security-Policy does not need style-src 'unsafe-inline'
+    // for this. (CSP restricts parsed inline style attributes, not .style.)
+    const xp    = getXP();
+    const total = typeof totalXP === "function" ? totalXP() : 0;
+    const pct   = total > 0 ? Math.round((xp / total) * 100) : 0;
+    const fill  = document.querySelector(".xp-fill");
+    if (fill) fill.style.width = `${pct}%`;
   }
 
   if (document.readyState === "loading") {

@@ -35,8 +35,19 @@ const Progress = (() => {
     return getCompleted().includes(lessonId);
   }
 
+  /**
+   * Sequential unlocking only makes sense when quizzes can actually be marked.
+   * Scoring happens on the faucet server, so with no server configured there is
+   * no way to complete lesson 1 and therefore no way to ever reach lesson 2.
+   * In that case the whole course opens for reading — "study mode".
+   */
+  function studyMode() {
+    return typeof faucetConfigured !== "function" || !faucetConfigured();
+  }
+
   function isUnlocked(lessonId) {
     if (lessonId <= 1) return true;
+    if (studyMode()) return true;
     return isComplete(lessonId - 1);
   }
 
@@ -47,5 +58,5 @@ const Progress = (() => {
     return idx >= 0 && idx < ids.length - 1 ? ids[idx + 1] : null;
   }
 
-  return { getXP, addXP, getCompleted, markComplete, isComplete, isUnlocked, nextLesson };
+  return { getXP, addXP, getCompleted, markComplete, isComplete, isUnlocked, nextLesson, studyMode };
 })();

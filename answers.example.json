@@ -1,0 +1,14 @@
+{
+  "_comment": "Template only — the real answers.json is gitignored and lives on the faucet server. Copy this file to answers.json on the server and fill in the correct option letters. Each array must have one entry per question in that lesson's quiz, in order.",
+  "1":  ["a", "a", "a", "a", "a"],
+  "2":  ["a", "a", "a", "a", "a"],
+  "3":  ["a", "a", "a", "a", "a"],
+  "4":  ["a", "a", "a", "a", "a"],
+  "5":  ["a", "a", "a", "a", "a"],
+  "6":  ["a", "a", "a", "a", "a"],
+  "7":  ["a", "a", "a", "a", "a"],
+  "8":  ["a", "a", "a", "a", "a"],
+  "9":  ["a", "a", "a", "a", "a"],
+  "10": ["a", "a", "a", "a", "a"],
+  "11": ["a", "a", "a", "a", "a"]
+}

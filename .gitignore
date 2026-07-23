@@ -1,1 +1,16 @@
 .DS_Store
+
+# PRIVATE — quiz answer key. Never commit: this repo is public.
+answers.json
+
+# Faucet server runtime state
+faucet.db
+*.db-journal
+.env
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Local tooling
+.claude/

@@ -2,7 +2,8 @@
 
 **Learn privacy. Earn Veil.**
 
-Veil Academy is an interactive, self-paced educational site for the [Veil cryptocurrency project](https://veil-project.com). Complete lessons on privacy tech, staking, mining, and the Veil ecosystem, then earn real Veil through quizzes.
+An interactive, self-paced course on the [Veil](https://veil-project.com) privacy
+coin — RingCT, staking, minting, and mining. Pass a quiz, earn real VEIL.
 
 🌐 **Live site:** [ohcee.github.io/Academy-Veil](https://ohcee.github.io/Academy-Veil)
 
@@ -10,27 +11,31 @@ Veil Academy is an interactive, self-paced educational site for the [Veil crypto
 
 ## Lessons
 
-| # | Topic |
-|---|-------|
-| 1 | What is the Veil Project? |
-| 2 | Setting Up the Core Wallet + Snapshot |
-| 3 | How RingCT Works |
-| 4 | How to Stake Veil |
-| 5 | Where to Get Veil |
-| 6 | Basecoin vs Stealth vs RingCT |
-| 7 | Minting for Staking |
-| 8 | Denominations & Efficiency |
-| 9 | Mining Algorithms |
-| 10 | Staking Zerocoin Mints |
-| 11 | How to Contribute |
+| # | Topic | XP |
+|---|-------|-----|
+| 1 | What is the Veil Project? | 50 |
+| 2 | Setting Up the Core Wallet + Snapshot | 50 |
+| 3 | How RingCT Works | 75 |
+| 4 | How to Stake Veil | 50 |
+| 5 | Where to Get Veil | 50 |
+| 6 | Coin Types and Where Veil Is Heading | 75 |
+| 7 | Minting for Staking | 75 |
+| 8 | Denominations & Efficiency | 75 |
+| 9 | Mining Algorithms | 75 |
+| 10 | Inside the Staking Engine | 100 |
+| 11 | How to Contribute | 100 |
+
+55 questions, 775 XP total.
 
 ---
 
-## How It Works
+## How it works
 
-- Work through lessons in order — each one unlocks the next after you pass the quiz
-- XP is tracked in your browser via `localStorage`
-- Pass a quiz, enter your Veil address, and the faucet sends you real Veil (10 VEIL daily cap per IP)
+- Lessons unlock in order — each opens after you pass the previous quiz.
+- XP is tracked in your browser via `localStorage`.
+- Pass a quiz and give a stealth address, and the faucet sends 1 VEIL as RingCT,
+  capped at 10 VEIL per day.
+- No account, no email, no KYC.
 
 ---
 
@@ -38,61 +43,121 @@ Veil Academy is an interactive, self-paced educational site for the [Veil crypto
 
 ```
 Academy-Veil/
-├── index.html          # Home / lesson grid
-├── lesson1–11.html     # Individual lesson + quiz pages
-├── style.css           # Shared styles
-├── progress.js         # localStorage XP + lesson lock/unlock logic
-├── quiz-reward.js      # Quiz scoring + faucet payout trigger
-├── quiz.js             # Quiz utilities
-├── api.py              # Flask faucet backend (runs on a separate server)
-└── veil-logo.png
+├── index.html            Home — lesson grid
+├── lesson.html           Single template for every lesson
+├── lessons.js            Lesson content and quiz questions (no answers)
+├── page-home.js          Builds the home grid
+├── page-lesson.js        Builds a lesson page
+├── progress.js           XP, completion, unlock logic
+├── quiz-reward.js        Quiz submission and payout display
+├── nav.js                Header, lesson nav, XP bar
+├── config.js             Faucet endpoint — the only file to edit when it moves
+├── confetti.js           Self-hosted celebration effect
+├── style.css             All styling
+│
+├── api.py                Faucet server (runs on a VPS, not on Pages)
+├── answers.example.json  Template for the answer key
+├── answers.json          The real key — GITIGNORED, server-only
+├── check_content.py      Validates lessons against the answer key
+└── DEPLOY.md             Faucet deployment guide
 ```
 
-The frontend is **100% static** and hosted on GitHub Pages. The `api.py` faucet runs on a separate VPS or home server with a Veil daemon (`veild`) running locally.
+The frontend is fully static and hosted on GitHub Pages. `api.py` runs separately
+on a VPS alongside a synced `veild`.
 
 ---
 
-## Running the Faucet Backend
+## Two design decisions worth knowing
 
-**Requirements:** Python 3.9+, a synced Veil daemon with RPC enabled
+### Quiz answers are not in this repo
 
-```bash
-pip install flask flask-cors
-python api.py
-```
+`lessons.js` ships to the browser and deliberately contains **no answers**. The
+key lives in `answers.json` — gitignored, deployed only to the faucet server —
+and the server scores every submission.
 
-Configure your Veil daemon's `veil.conf`:
+This is not incidental. The faucet pays real money, and an answer key in a public
+repo, or in a file the browser downloads, is not an answer key: anyone could read
+it with View Source and farm the daily cap.
 
-```
-rpcuser=yourusername
-rpcpassword=yourpassword
-rpcport=58812
-server=1
-```
-
-Set your RPC credentials as environment variables before running:
+If you add or edit a quiz, update `answers.json` on the server too, then run:
 
 ```bash
-export VEIL_RPC_USER=yourusername
-export VEIL_RPC_PASS=yourpassword
-export VEIL_RPC_PORT=58812
+python3 check_content.py
 ```
 
-The API runs on `http://127.0.0.1:5000` and should be proxied behind nginx with HTTPS in production.
+It fails loudly if the questions and the key have drifted apart.
+
+### The site makes zero third-party requests
+
+No CDN, no webfonts, no analytics, no trackers. Every asset comes from the site's
+own origin, and both pages carry a Content-Security-Policy that forbids inline
+script and blocks outside loads.
+
+A site teaching people about network-level privacy should not hand every
+visitor's IP address to Google Fonts and jsDelivr on page load. `confetti.js`
+exists because replacing a CDN dependency with sixty lines of canvas code was
+cheaper than justifying the request.
+
+The faucet applies the same standard: it stores a date-salted hash of your IP for
+rate limiting, never your payout address, and never a link between the two.
+
+---
+
+## Content accuracy
+
+Every factual claim is checked against Veil core at the current release
+(**v1.4.2.0**), and most lessons link the source file that backs them.
+
+The rule for this repo: **do not describe unmerged work as if it ships today.**
+RingCT staking ([#1019](https://github.com/Veil-Project/veil/pull/1019)) and
+auto-convert ([#1055](https://github.com/Veil-Project/veil/pull/1055)) are open
+PRs, so Lesson 6 presents them as the project's direction while saying plainly
+that they are not in the wallet yet. Staking today uses Zerocoin mints, and the
+lessons say so — RingCT outputs and Zerocoin mints are different things and are
+very easy to conflate.
+
+If you edit content, verify against `Veil-Project/veil` at the tag people are
+actually running, not against a branch or a blog post.
+
+---
+
+## Running locally
+
+```bash
+python3 -m http.server 8099
+```
+
+Open <http://localhost:8099>. With `FAUCET_URL: null` in `config.js` the site
+runs in **study mode**: every lesson is readable and quizzes appear as self-check
+questions. Marking requires the faucet server, because that is where the answers
+live.
+
+To exercise the full flow, follow [DEPLOY.md](DEPLOY.md) to run `api.py` locally
+and set `FAUCET_URL` to `http://127.0.0.1:5000`. The CSP allows loopback origins,
+so this works without TLS.
 
 ---
 
 ## Deployment
 
-The static site deploys automatically to GitHub Pages via GitHub Actions on every push to `main`.
+The static site deploys to GitHub Pages via Actions on every push to `main`
+(**Settings → Pages → Source: GitHub Actions**).
 
-To enable: **Settings → Pages → Source: GitHub Actions**
+The faucet is deployed separately — see **[DEPLOY.md](DEPLOY.md)**, which covers
+the hot-wallet setup, the reverse-proxy configuration that makes IP rate limiting
+actually work, and what the faucet does and does not protect against.
 
 ---
 
 ## Contributing
 
-Lesson corrections, new lessons, and UI improvements are welcome. Open an issue or PR.
+To add a lesson: copy the last object in `lessons.js`, increment the `id`, write
+the body and quiz, add matching answers to `answers.json`, and run
+`check_content.py`. Everything else — nav, grid, XP total, unlock chain — derives
+from the data and updates itself.
+
+Corrections to the content are especially welcome. If something here is wrong, it
+is teaching people something wrong.
 
 For core Veil development, see the [main Veil repo](https://github.com/Veil-Project/veil).
 
