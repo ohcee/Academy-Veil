@@ -24,6 +24,21 @@ nothing and adds the risk of an unlock left open. Keep the balance small instead
 The faucet refuses to spend below `FAUCET_MIN_RESERVE`, so a drain attempt hits a
 floor rather than emptying the wallet.
 
+### Fund it in RingCT, not basecoin
+
+Payouts use `sendringcttoringct`, which spends **RingCT inputs**. A wallet holding
+its float as basecoin cannot pay out, and `/api/health` will report
+`"payouts": false` even though the balance looks fine in the GUI — the reserve
+check reads `ringct_spendable`, not the total.
+
+After funding, convert the float and confirm:
+
+```bash
+veil-cli getbalances | grep ringct_spendable
+```
+
+That number is what the faucet can actually spend.
+
 ### veil.conf
 
 ```
