@@ -9,7 +9,7 @@
 
 const CONFIG = {
   // e.g. "https://faucet.example.org"   (no trailing slash)
-  FAUCET_URL: null,
+  FAUCET_URL: "https://faucet.veil-info.org",
 
   // Shown to the user so the reward is stated before they enter an address.
   REWARD_TEXT: "1 VEIL",
