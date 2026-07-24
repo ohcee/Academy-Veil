@@ -236,7 +236,7 @@ const LESSONS = [
       { type: "h", text: "Staking" },
       { type: "p", text: "If you already hold Veil, staking earns more of it without any counterparty at all. See Lesson 4." },
       { type: "h", text: "This faucet" },
-      { type: "p", text: "Pass a lesson quiz and this site sends you 1 VEIL, up to a cap of 10 VEIL per day. It is a way to get a working balance with no exchange account and no KYC, so you can practise minting, staking, and sending for real. The Veil Discord also runs a community faucet, another no-KYC way to pick up a small amount." },
+      { type: "p", text: "Pass a lesson quiz and this site sends you 1 VEIL, up to a cap of 12 VEIL per day. It is a way to get a working balance with no exchange account and no KYC, so you can practise minting, staking, and sending for real. The Veil Discord also runs a community faucet, another no-KYC way to pick up a small amount." },
       { type: "note", text: "Faucet privacy: payouts are sent to your stealth address as RingCT. This site records only a salted hash of your IP address for rate limiting, never the address you were paid to, and never a link between the two. Even so, the strongest habit is to treat any address you post into a website as a public address, so use a fresh one." }
     ],
     quiz: [
@@ -246,7 +246,7 @@ const LESSONS = [
       },
       {
         prompt: "What is this faucet's daily cap?",
-        options: { a: "5 VEIL", b: "25 VEIL", c: "10 VEIL" }
+        options: { a: "5 VEIL", b: "25 VEIL", c: "12 VEIL" }
       },
       {
         prompt: "Why is buying Veil on a non-KYC exchange better for your privacy?",
