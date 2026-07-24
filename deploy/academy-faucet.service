@@ -1,0 +1,54 @@
+# systemd unit for the Veil Academy faucet.
+#
+# Install:
+#   sudo cp deploy/academy-faucet.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now academy-faucet
+#
+# Logs:  journalctl -u academy-faucet -f
+
+[Unit]
+Description=Veil Academy faucet API
+Documentation=https://github.com/ohcee/Academy-Veil/blob/main/DEPLOY.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=exec
+User=academy
+Group=academy
+WorkingDirectory=/opt/academy
+
+# Holds the RPC password and FAUCET_SECRET. Must be mode 600, owned by root.
+EnvironmentFile=/etc/academy.env
+
+ExecStart=/opt/academy/venv/bin/gunicorn \
+    --workers 2 \
+    --bind 127.0.0.1:5000 \
+    --access-logfile /dev/null \
+    --error-logfile - \
+    api:app
+
+Restart=on-failure
+RestartSec=5s
+
+# Access logging is off above on purpose: gunicorn's access log records client
+# IPs, which would reintroduce exactly the linkage api.py avoids storing.
+
+# The service needs its own directory and nothing else.
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+ReadWritePaths=/opt/academy
+
+[Install]
+WantedBy=multi-user.target

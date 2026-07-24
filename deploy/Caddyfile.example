@@ -1,0 +1,49 @@
+# Caddy config for the Veil Academy faucet.
+#
+# Caddy is used instead of nginx because it obtains and renews the Let's Encrypt
+# certificate on its own — no certbot, no cron job, no expiry surprises. The site
+# is served from GitHub Pages over HTTPS, so the faucet must be HTTPS too or the
+# browser blocks the request as mixed content.
+#
+# Install to /etc/caddy/Caddyfile, then:  sudo systemctl reload caddy
+#
+# Replace faucet.example.org with your hostname. Its A record must already point
+# at this server before you reload, or the certificate request will fail.
+
+faucet.example.org {
+	# Do not log visitor IPs.
+	#
+	# api.py goes out of its way to store only a date-salted hash of the client
+	# address and to keep payout addresses out of its logs, so that no
+	# IP-to-payout link exists anywhere. An access log sitting next to it
+	# recording every IP and timestamp would quietly undo all of that.
+	log {
+		output discard
+	}
+
+	handle /api/* {
+		reverse_proxy 127.0.0.1:5000 {
+			# Replace X-Forwarded-For with the real peer address rather than
+			# appending to whatever the client sent.
+			#
+			# This is the setting that matters most in this file. Appending
+			# preserves client-supplied values, which lets anyone invent an IP
+			# per request and walk straight past the daily cap. Caddy's
+			# header_up with a leading > replaces the header.
+			header_up >X-Forwarded-For {remote_host}
+		}
+	}
+
+	# Anything that is not the API gets nothing. The faucet has no web UI; the
+	# site lives on GitHub Pages.
+	handle {
+		respond "Veil Academy faucet. See https://ohcee.github.io/Academy-Veil" 200
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+		-Server
+	}
+}

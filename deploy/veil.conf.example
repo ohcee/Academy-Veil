@@ -1,0 +1,21 @@
+# veil.conf for the faucet node.
+#
+# Goes at /home/academy/.veil/veil.conf, owned by academy, mode 600.
+# Replace REPLACE_WITH_STRONG_RANDOM below — generate it with:
+#   openssl rand -hex 32
+
+server=1
+listen=1
+
+# RPC is wallet control. Bind it to loopback and allow only loopback, so it is
+# reachable by the faucet on this box and by nothing else. The firewall does not
+# open 58812; this is the second layer.
+rpcbind=127.0.0.1
+rpcallowip=127.0.0.1
+rpcport=58812
+rpcuser=faucet
+rpcpassword=REPLACE_WITH_STRONG_RANDOM
+
+# Speeds up the initial sync. Safe to lower to 450 afterwards if you want the RAM
+# back, but this box has plenty.
+dbcache=2048

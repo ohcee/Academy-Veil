@@ -14,11 +14,12 @@
   function buildNav(currentId) {
     const completedRaw = localStorage.getItem("veil_completed");
     const completed = completedRaw ? JSON.parse(completedRaw) : [];
+    const studyMode = (typeof Progress !== "undefined" && typeof Progress.studyMode === "function") && Progress.studyMode();
 
     const lessonLinks = LESSONS.map(l => {
       const isActive   = l.id === currentId;
       const isDone     = completed.includes(l.id);
-      const isLocked   = l.id > 1 && !completed.includes(l.id - 1) && !isActive;
+      const isLocked   = !studyMode && l.id > 1 && !completed.includes(l.id - 1) && !isActive;
       const cls = [
         "nav-lesson",
         isActive  ? "active"   : "",

@@ -1,0 +1,39 @@
+# systemd unit for the Veil node the faucet talks to.
+#
+# Runs as the unprivileged `academy` user with its data directory under that
+# user's home. The faucet reaches it over loopback RPC only; nothing here is
+# exposed off-box.
+#
+# Install:
+#   sudo cp deploy/veild.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now veild
+
+[Unit]
+Description=Veil node (faucet backend)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=academy
+Group=academy
+
+# -datadir is explicit so the unit does not depend on the user's HOME.
+ExecStart=/usr/local/bin/veild -datadir=/home/academy/.veil -conf=/home/academy/.veil/veil.conf
+ExecStop=/usr/local/bin/veil-cli -datadir=/home/academy/.veil -conf=/home/academy/.veil/veil.conf stop
+
+Restart=on-failure
+RestartSec=10s
+TimeoutStopSec=120s
+
+# A wallet daemon needs only its own data directory.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectKernelTunables=true
+ProtectControlGroups=true
+ReadWritePaths=/home/academy/.veil
+
+[Install]
+WantedBy=multi-user.target

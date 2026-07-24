@@ -172,7 +172,6 @@ For core Veil development, see the [main Veil repo](https://github.com/Veil-Proj
 | Core Wallet | [github.com/Veil-Project/veil/releases](https://github.com/Veil-Project/veil/releases) |
 | Blockchain Snapshot | [veil.tools](https://veil.tools) |
 | Explorer | [explorer.veil-project.com](https://explorer.veil-project.com/main) |
-| Live Stats | [veil-stats.com](https://veil-stats.com) |
 
 ---
 
