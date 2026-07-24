@@ -32,7 +32,7 @@
     <h1 class="hero-title">Veil <span class="accent">Academy</span></h1>
     <p class="hero-sub">Master privacy. Learn to stake and mine.<br>Complete lessons. Earn real Veil.</p>
     <div class="hero-stats" id="heroStats">
-      <div class="stat"><span id="statLessons">11</span><label>Lessons</label></div>
+      <div class="stat"><span id="statLessons">12</span><label>Lessons</label></div>
       <div class="stat"><span id="statXP">0</span><label>XP Earned</label></div>
       <div class="stat"><span id="statDone">0</span><label>Completed</label></div>
     </div>
@@ -40,6 +40,19 @@
 
   <section class="grid-section">
     <div class="lesson-grid" id="lessonGrid"></div>
+  </section>
+
+  <section class="fund-section">
+    <h2 class="fund-title">Keep the faucet running</h2>
+    <p class="fund-blurb">This faucet pays real VEIL from a community-funded wallet. Every donation keeps the lessons paying out for the next person learning Veil. Scan or copy the stealth address below and send any amount, no account needed.</p>
+    <div class="fund-card">
+      <img src="donate-qr.svg" alt="Veil faucet donation address QR code" class="fund-qr" width="220" height="220">
+      <div class="fund-addr-wrap">
+        <span class="fund-addr-label">Faucet donation address</span>
+        <code class="fund-addr" id="fundAddr">sv1qqpm0pncjg74n3jwzqzzp7xm95n6ap45qtt029r84yc25k7rgrj2z6qpqv5tdlxt9zh2j6h9nxqhr3y9s08pu2q9j0wu6wk24sv9fxmq9ffj6qqqk09t2s</code>
+        <button class="fund-copy" type="button" id="fundCopy">Copy address</button>
+      </div>
+    </div>
   </section>
 
 </main>

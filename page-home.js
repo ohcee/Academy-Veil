@@ -49,4 +49,30 @@
   grid.querySelectorAll('a[data-locked="true"]').forEach(card => {
     card.addEventListener("click", e => e.preventDefault());
   });
+
+  // Copy the faucet donation address.
+  const copyBtn = document.getElementById("fundCopy");
+  const fundAddr = document.getElementById("fundAddr");
+  if (copyBtn && fundAddr) {
+    copyBtn.addEventListener("click", () => {
+      const text = fundAddr.textContent.trim();
+      const done = () => {
+        const orig = copyBtn.textContent;
+        copyBtn.textContent = "Copied";
+        setTimeout(() => { copyBtn.textContent = orig; }, 1500);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(selectAddr);
+      } else {
+        selectAddr();
+      }
+      function selectAddr() {
+        const range = document.createRange();
+        range.selectNodeContents(fundAddr);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+    });
+  }
 })();
