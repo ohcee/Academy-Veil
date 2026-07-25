@@ -33,7 +33,7 @@ const LESSONS = [
       { type: "p", text: "Veil is a privacy-focused cryptocurrency that launched on 1 January 2019. It combines RingCT and stealth addresses to hide amounts and participants, and uses Dandelion++ to obscure which node originated a transaction when it is broadcast." },
       { type: "p", text: "Veil has a maximum supply of 300 million coins and runs a hybrid system: half of all blocks are produced by Proof-of-Stake, the other half by three separate Proof-of-Work algorithms." },
       { type: "h", text: "How the 50/50 split actually works" },
-      { type: "p", text: "Veil does not pick an algorithm at random. Each algorithm has its own target block spacing, and difficulty adjusts independently to hold that spacing. Proof-of-Work and Proof-of-Stake blocks alternate, so the daily block counts fall out of the arithmetic:" },
+      { type: "p", text: "Veil does not pick an algorithm at random. Each algorithm has its own target block spacing, and difficulty adjusts independently to hold that spacing. Proof-of-Work and Proof-of-Stake compete for each block rather than taking turns, and on average each wins about half, so the daily block counts fall out of the arithmetic:" },
       { type: "ul", items: [
         "ProgPoW, one block every 172 seconds, about 35% of daily blocks (GPU mining)",
         "RandomX, one block every 600 seconds, about 10% of daily blocks (CPU mining)",
@@ -184,7 +184,7 @@ const LESSONS = [
       { type: "ul", items: [
         "Veil core wallet, fully synced",
         "A balance of Zerocoin mints with at least 1000 confirmations",
-        "Wallet unlocked for staking only, not fully unlocked",
+        "Wallet unlocked, with staking only the safer choice (a fully unlocked wallet stakes too)",
         "The wallet running continuously; you cannot stake while offline"
       ]},
       { type: "h", text: "Unlocking for staking only" },
@@ -241,7 +241,7 @@ const LESSONS = [
     ],
     quiz: [
       {
-        prompt: "Which algorithm is designed for CPU mining on Veil?",
+        prompt: "Which Veil algorithm was purpose-built for CPUs and to resist ASICs?",
         options: { a: "ProgPoW", b: "RandomX", c: "SHA-256d" }
       },
       {
@@ -322,8 +322,9 @@ const LESSONS = [
       { type: "p", text: "The number is the amount to mint, and it should match a supported denomination (10, 100, 1000, or 10000 VEIL)." },
       { type: "h", text: "Maturity" },
       { type: "p", text: "A new mint cannot stake immediately. It needs 1000 confirmations before the staking engine will consider it. At roughly one block per minute that is somewhere around 16 to 17 hours. Until then the mint shows in your balance but contributes no staking weight." },
-      { type: "h", text: "Going back the other way" },
-      { type: "p", text: "Minting is not a trapdoor. The spendzerocoin command converts mints back into spendable output, and of course spending a mint in a normal transaction also consumes it. What you cannot do is silently un-mint in place, since reversing it is a transaction on the chain like any other." }
+      { type: "h", text: "Spending your mints" },
+      { type: "p", text: "Minting does not lock your coins away. Zerocoin mints are spendable like any other balance, and in the GUI wallet they are what gets spent by default. You do not need to convert them back to something else first." },
+      { type: "p", text: "If you want to spend a different coin type instead, use Coin Control in the GUI to choose. From the command line, spendzerocoin gives you finer control, including restricting which denomination is used so you can avoid breaking the larger mints you are staking with." }
     ],
     sources: [
       { label: "rpczerocoin.cpp, mintzerocoin and spendzerocoin", url: "https://github.com/Veil-Project/veil/blob/master/src/wallet/rpczerocoin.cpp" },
@@ -347,8 +348,8 @@ const LESSONS = [
         options: { a: "mintzerocoin", b: "createmint", c: "stakemint" }
       },
       {
-        prompt: "Can a mint be converted back to spendable output?",
-        options: { a: "No, minting is permanent", b: "Yes, with spendzerocoin", c: "Only after the mint has won a block" }
+        prompt: "Once you have Zerocoin mints, can you still spend them normally?",
+        options: { a: "No, they are locked until you unmint them", b: "Yes, the GUI wallet spends them by default", c: "Only after the mint has won a block" }
       }
     ]
   },
