@@ -13,7 +13,7 @@ const CONFIG = {
 
   // Shown to the user so the reward is stated before they enter an address.
   REWARD_TEXT: "1 VEIL",
-  DAILY_CAP_TEXT: "10 VEIL per day",
+  DAILY_CAP_TEXT: "12 VEIL per day",
 
   // Block explorer used to link a payout txid.
   EXPLORER_TX: "https://explorer.veil-project.com/tx/"
