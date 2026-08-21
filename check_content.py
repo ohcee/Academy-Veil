@@ -97,24 +97,70 @@ def main():
 
         for lesson in lessons:
             lid = str(lesson["id"])
-            n = len(lesson.get("quiz", []))
+            quiz = lesson.get("quiz", [])
+            n = len(quiz)
 
             if lid not in key:
                 problems.append(f"lesson {lid}: no entry in {args.answers}")
                 continue
 
-            if len(key[lid]) != n:
-                problems.append(
-                    f"lesson {lid}: {n} questions but {len(key[lid])} answers in the key"
-                )
-                continue
+            entry = key[lid]
 
-            for qi, (ans, q) in enumerate(zip(key[lid], lesson["quiz"])):
-                if ans not in q.get("options", {}):
+            # Legacy format: a bare list of correct letters, one per question.
+            if isinstance(entry, list):
+                if len(entry) != n:
                     problems.append(
-                        f"lesson {lid} q{qi + 1}: key says {ans!r} "
-                        f"but options are {sorted(q.get('options', {}))}"
+                        f"lesson {lid}: {n} questions but {len(entry)} answers in the key"
                     )
+                    continue
+                for qi, (ans, q) in enumerate(zip(entry, quiz)):
+                    if ans not in q.get("options", {}):
+                        problems.append(
+                            f"lesson {lid} q{qi + 1}: key says {ans!r} "
+                            f"but options are {sorted(q.get('options', {}))}"
+                        )
+
+            # Explicit format: {"serve": k, "questions": [{options, answer}, ...]}.
+            # The bank and lessons.js quiz[] are index-aligned, so they must be the
+            # same length, and each key question's options must exist in lessons.js.
+            elif isinstance(entry, dict):
+                qs = entry.get("questions")
+                if not isinstance(qs, list) or not qs:
+                    problems.append(f"lesson {lid}: explicit key has no questions[]")
+                    continue
+                if len(qs) != n:
+                    problems.append(
+                        f"lesson {lid}: {n} questions in lessons.js but {len(qs)} in the "
+                        "key bank (they must be index-aligned)"
+                    )
+                    continue
+                serve = entry.get("serve", len(qs))
+                if not isinstance(serve, int) or not 1 <= serve <= len(qs):
+                    problems.append(
+                        f"lesson {lid}: serve={serve!r} must be between 1 and {len(qs)}"
+                    )
+                for qi, (kq, q) in enumerate(zip(qs, quiz)):
+                    valid = set(q.get("options", {}))
+                    opts = kq.get("options", [])
+                    ans = kq.get("answer")
+                    if not isinstance(opts, list) or len(opts) < 2:
+                        problems.append(
+                            f"lesson {lid} q{qi + 1}: key question needs an options list of 2+"
+                        )
+                        continue
+                    for k in opts:
+                        if k not in valid:
+                            problems.append(
+                                f"lesson {lid} q{qi + 1}: key option {k!r} not in "
+                                f"lessons.js options {sorted(valid)}"
+                            )
+                    if ans not in opts:
+                        problems.append(
+                            f"lesson {lid} q{qi + 1}: answer {ans!r} not among key options {opts}"
+                        )
+
+            else:
+                problems.append(f"lesson {lid}: unrecognised answer format in the key")
 
         for lid in key:
             if lid not in [str(l["id"]) for l in lessons]:

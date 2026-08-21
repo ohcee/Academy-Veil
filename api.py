@@ -34,18 +34,21 @@ Environment variables:
     FAUCET_REWARD          VEIL per passed lesson                (default 1)
     FAUCET_GLOBAL_DAILY    VEIL paid to everyone per day         (default 500)
     FAUCET_MIN_RESERVE     never spend the wallet below this     (default 100)
-    FAUCET_RING_SIZE       ring size for payouts                 (default 4)
+    FAUCET_RING_SIZE       ring size for payouts                 (default 11)
+    FAUCET_QUIZ_TTL        seconds a quiz session token is valid (default 1800)
     FAUCET_DB              sqlite path                           (default faucet.db)
     FAUCET_ANSWERS         answer key path                       (default answers.json)
 
 Run behind a reverse proxy with TLS. See DEPLOY.md.
 """
 
+import base64
 import hashlib
 import hmac
 import json
 import logging
 import os
+import secrets
 import sqlite3
 import time
 from datetime import date, timedelta
@@ -78,10 +81,21 @@ DAILY_CAP = _env_decimal("FAUCET_DAILY_CAP", "10")
 REWARD = _env_decimal("FAUCET_REWARD", "1")
 GLOBAL_DAILY = _env_decimal("FAUCET_GLOBAL_DAILY", "500")
 MIN_RESERVE = _env_decimal("FAUCET_MIN_RESERVE", "100")
-RING_SIZE = int(os.environ.get("FAUCET_RING_SIZE", "4"))
+RING_SIZE = int(os.environ.get("FAUCET_RING_SIZE", "11"))
+
+# How long a quiz session token stays valid. The client fetches a token from
+# /api/quiz/start, then must submit before this elapses. Short enough that a
+# harvested token cannot be replayed later; long enough for a real reader.
+QUIZ_TOKEN_TTL = int(os.environ.get("FAUCET_QUIZ_TTL", "1800"))
 
 DB_PATH = os.environ.get("FAUCET_DB", "faucet.db")
 ANSWERS_PATH = os.environ.get("FAUCET_ANSWERS", "answers.json")
+
+# Cryptographically-seeded RNG for shuffling served questions and option order.
+# The shuffle is not itself a secret (it is sent to the client so it can render
+# the quiz); it only has to VARY per session so a fixed answer sequence cannot be
+# memorised. The nonce that makes a token single-use is what must be unguessable.
+_RNG = secrets.SystemRandom()
 
 # Brute-force limits. Five questions with three options each is only 243
 # combinations, so unlimited attempts would defeat server-side scoring entirely.
@@ -119,12 +133,78 @@ def _startup_checks():
 
 _startup_checks()
 
-with open(ANSWERS_PATH) as fh:
-    ANSWERS = {
-        int(k): [a.strip().lower() for a in v]
-        for k, v in json.load(fh).items()
-        if not k.startswith("_")
-    }
+def _load_answers(path):
+    """
+    Parse the answer key into {lesson_id: {"serve": n, "questions": [...]}}.
+
+    Two on-disk formats are accepted per lesson:
+
+      * Legacy — a bare list of correct option letters, one per question:
+            "1": ["b", "a", "b", "a", "a"]
+        Each question is assumed to have options a, b, c (every current lesson
+        does). This is what the existing answers.json already uses, so no edit
+        is needed to deploy the shuffle/token protections.
+
+      * Explicit — required for a question bank or for anything other than three
+        a/b/c options:
+            "2": {"serve": 5, "questions": [
+                     {"options": ["a","b","c"], "answer": "b"}, ...]}
+        `serve` (optional, default = all) is how many of the bank to show each
+        attempt; the server picks that many at random and shuffles their options.
+
+    Each question is normalised to {"options": [keys...], "answer": key}.
+    """
+    with open(path) as fh:
+        raw = json.load(fh)
+
+    out = {}
+    for k, v in raw.items():
+        if k.startswith("_"):
+            continue
+        lid = int(k)
+
+        if isinstance(v, list):
+            questions = []
+            for ans in v:
+                a = str(ans).strip().lower()
+                # Widen the option set only if a legacy answer letter is beyond
+                # c; otherwise the standard three options a, b, c.
+                n = 3
+                if len(a) == 1 and a.isalpha():
+                    n = max(3, ord(a) - ord("a") + 1)
+                opts = [chr(ord("a") + i) for i in range(n)]
+                if a not in opts:
+                    raise RuntimeError(f"lesson {lid}: answer '{a}' not a valid option letter")
+                questions.append({"options": opts, "answer": a})
+            out[lid] = {"serve": len(questions), "questions": questions}
+
+        elif isinstance(v, dict):
+            parsed = []
+            for q in v.get("questions", []):
+                opts = [str(o).strip().lower() for o in q.get("options", [])]
+                ans = str(q.get("answer", "")).strip().lower()
+                if len(opts) < 2:
+                    raise RuntimeError(f"lesson {lid}: a question has fewer than two options")
+                if len(set(opts)) != len(opts):
+                    raise RuntimeError(f"lesson {lid}: duplicate option keys {opts}")
+                if ans not in opts:
+                    raise RuntimeError(f"lesson {lid}: answer '{ans}' not in options {opts}")
+                parsed.append({"options": opts, "answer": ans})
+            if not parsed:
+                raise RuntimeError(f"lesson {lid}: no questions")
+            serve = int(v.get("serve", len(parsed)))
+            serve = max(1, min(serve, len(parsed)))
+            out[lid] = {"serve": serve, "questions": parsed}
+
+        else:
+            raise RuntimeError(f"lesson {lid}: unrecognised answer format")
+
+    if not out:
+        raise RuntimeError("answer key is empty")
+    return out
+
+
+ANSWERS = _load_answers(ANSWERS_PATH)
 
 CORS(
     app,
@@ -195,6 +275,10 @@ CREATE TABLE IF NOT EXISTS global_spend (
     day   TEXT PRIMARY KEY,
     total TEXT NOT NULL DEFAULT '0'
 );
+CREATE TABLE IF NOT EXISTS tokens (
+    nonce TEXT PRIMARY KEY,
+    day   TEXT NOT NULL
+);
 """
 
 
@@ -216,7 +300,7 @@ def init_db():
 def purge_old(conn):
     """Drop everything older than yesterday. We keep no long-term history."""
     cutoff = (date.today() - timedelta(days=1)).isoformat()
-    for table in ("spend", "claims", "attempts"):
+    for table in ("spend", "claims", "attempts", "tokens"):
         conn.execute(f"DELETE FROM {table} WHERE day < ?", (cutoff,))
     conn.execute("DELETE FROM global_spend WHERE day < ?", (cutoff,))
 
@@ -433,6 +517,57 @@ def count_attempt(conn, client: str, lesson_id: int) -> int:
         raise
 
 
+# ── Quiz session tokens ──────────────────────────────────────────────────────
+#
+# The client never learns the answer key. Instead /api/quiz/start hands out a
+# per-attempt token that pins (a) which questions are asked, (b) the order the
+# options are shown in, and (c) a one-time nonce and issue time. The token is
+# HMAC-signed with FAUCET_SECRET so the client cannot forge or edit it. Because
+# the option order is different every session and the token is single-use and
+# short-lived, a memorised answer sequence is worthless and a captured token
+# cannot be replayed. The permutation itself is not secret — the client needs it
+# to render the quiz — so it travels in the clear inside the signed payload.
+
+
+def _sign(b64: str) -> str:
+    return hmac.new(SECRET.encode(), b64.encode(), hashlib.sha256).hexdigest()
+
+
+def make_token(payload: dict) -> str:
+    raw = json.dumps(payload, separators=(",", ":"), sort_keys=True).encode()
+    b64 = base64.urlsafe_b64encode(raw).decode().rstrip("=")
+    return f"{b64}.{_sign(b64)}"
+
+
+def read_token(token):
+    """Return the payload dict for a valid token, else None. Never raises."""
+    if not isinstance(token, str) or "." not in token:
+        return None
+    b64, _, sig = token.partition(".")
+    if not hmac.compare_digest(sig, _sign(b64)):
+        return None
+    try:
+        raw = base64.urlsafe_b64decode(b64 + "=" * (-len(b64) % 4))
+        payload = json.loads(raw)
+    except (ValueError, TypeError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def burn_token(conn, nonce: str) -> bool:
+    """
+    Record a token nonce as spent. Returns True the first time and False on any
+    later attempt, so a token can be submitted at most once. INSERT OR IGNORE is
+    atomic, so two concurrent submissions of the same token cannot both win.
+    """
+    if not isinstance(nonce, str) or not nonce:
+        return False
+    cur = conn.execute(
+        "INSERT OR IGNORE INTO tokens (nonce, day) VALUES (?, ?)", (nonce, today_str())
+    )
+    return cur.rowcount == 1
+
+
 # ── Routes ───────────────────────────────────────────────────────────────────
 
 
@@ -452,45 +587,130 @@ def health():
     })
 
 
+@app.route("/api/quiz/start", methods=["GET"])
+def quiz_start():
+    """
+    Begin a quiz attempt. Returns a signed session token plus the questions to
+    show — which ones, and the order to render each one's options — so the client
+    can render the quiz without ever seeing the answer key.
+
+    Request:  /api/quiz/start?lessonId=1
+    Response: {"token": "...", "ttl": 1800,
+               "questions": [{"qi": 3, "order": ["c","a","b"]}, ...]}
+
+    `qi` indexes the lesson's question bank (the same array the client holds in
+    lessons.js); `order` is the option keys in the sequence to display them. The
+    user submits the *position* they picked, never a key, so knowing which key is
+    correct does not survive the shuffle.
+    """
+    try:
+        lesson_id = int(request.args.get("lessonId"))
+    except (TypeError, ValueError):
+        return jsonify({"error": "Missing lesson id."}), 400
+
+    spec = ANSWERS.get(lesson_id)
+    if spec is None:
+        return jsonify({"error": "Unknown lesson."}), 404
+
+    bank = spec["questions"]
+    serve = min(spec["serve"], len(bank))
+
+    # Random subset, random question order, and a fresh option order per
+    # question — all three vary from one attempt to the next.
+    served = []
+    for qi in _RNG.sample(range(len(bank)), serve):
+        order = list(bank[qi]["options"])
+        _RNG.shuffle(order)
+        served.append({"qi": qi, "order": order})
+
+    payload = {
+        "lid": lesson_id,
+        "qs": served,
+        "n": secrets.token_hex(12),
+        "iat": int(time.time()),
+    }
+    return jsonify({
+        "token": make_token(payload),
+        "ttl": QUIZ_TOKEN_TTL,
+        "questions": served,
+    })
+
+
 @app.route("/api/quiz", methods=["POST"])
 def quiz():
     """
-    Score a quiz and, if it passes and an address was supplied, pay the reward.
+    Score a quiz attempt and, if it passes and an address was supplied, pay out.
 
-    Request:  {"lessonId": 1, "answers": ["a","b",...], "address": "sv1..."}
-    Response: {"passed": bool, "correct": [bool,...], "score": n, "total": n,
+    Request:  {"token": "<from /api/quiz/start>", "answers": [1, 0, 2, ...],
+               "address": "sv1..."}
+              `answers[i]` is the option *position* chosen for the i-th served
+              question, indexing that question's shuffled `order`.
+    Response: {"passed": bool, "score": n, "total": n,
                "payout": {"sent": bool, "txid": str|null, "note": str|null}}
 
-    The per-question `correct` array is only returned once the client has already
-    committed to a full set of answers, and attempts are capped, so it cannot be
-    used as an oracle to walk to the answer key.
+    A failing response returns only the score, never which questions were wrong.
+    A per-question oracle plus a few attempts would otherwise leak the whole key.
+    The token is single-use and short-lived, so a failed attempt cannot be
+    re-scored — the client fetches a fresh session to try again.
     """
     body = request.get_json(silent=True)
     if not isinstance(body, dict):
         return jsonify({"error": "Malformed request."}), 400
 
-    # Lesson id
-    try:
-        lesson_id = int(body.get("lessonId"))
-    except (TypeError, ValueError):
-        return jsonify({"error": "Missing lesson id."}), 400
+    payload = read_token(body.get("token"))
+    if payload is None:
+        return jsonify({
+            "error": "This quiz session is invalid. Refresh the page for a new one.",
+            "expired": True,
+        }), 400
 
-    key = ANSWERS.get(lesson_id)
-    if key is None:
+    # Freshness. Reject an expired token; the small negative allowance guards
+    # against one stamped slightly in the future by clock skew.
+    iat = payload.get("iat")
+    now = time.time()
+    if not isinstance(iat, (int, float)) or now - iat > QUIZ_TOKEN_TTL or iat - now > 60:
+        return jsonify({
+            "error": "This quiz session timed out. Refresh the page for a new one.",
+            "expired": True,
+        }), 400
+
+    lesson_id = payload.get("lid")
+    spec = ANSWERS.get(lesson_id) if isinstance(lesson_id, int) else None
+    if spec is None:
         return jsonify({"error": "Unknown lesson."}), 404
+    bank = spec["questions"]
 
-    # Answers
+    served = payload.get("qs")
+    if not isinstance(served, list) or not served:
+        return jsonify({"error": "Malformed quiz session.", "expired": True}), 400
+
     answers = body.get("answers")
-    if not isinstance(answers, list) or len(answers) != len(key):
+    if not isinstance(answers, list) or len(answers) != len(served):
         return jsonify({"error": "Answer the whole quiz before submitting."}), 400
-    if not all(isinstance(a, str) and len(a) <= 2 for a in answers):
-        return jsonify({"error": "Malformed answers."}), 400
+
+    # Each answer is a chosen display position. Booleans are ints in Python, so
+    # reject them explicitly.
+    positions = []
+    for a, q in zip(answers, served):
+        order = q.get("order") if isinstance(q, dict) else None
+        if not isinstance(order, list) or isinstance(a, bool) or not isinstance(a, int) \
+                or a < 0 or a >= len(order):
+            return jsonify({"error": "Malformed answers."}), 400
+        positions.append(a)
 
     client = client_key()
     conn = get_db()
 
     try:
         purge_old(conn)
+
+        # Single-use: burn the token before counting the attempt, so a replay is
+        # rejected outright rather than consuming one of the user's tries.
+        if not burn_token(conn, payload.get("n")):
+            return jsonify({
+                "error": "This quiz was already submitted. Refresh the page for a new one.",
+                "expired": True,
+            }), 409
 
         n = count_attempt(conn, client, lesson_id)
         if n > MAX_ATTEMPTS_PER_LESSON:
@@ -499,17 +719,24 @@ def quiz():
                          "Re-read the lesson and come back tomorrow."
             }), 429
 
-        # Score
-        given = [a.strip().lower() for a in answers]
-        correct = [hmac.compare_digest(g, k) for g, k in zip(given, key)]
-        score = sum(correct)
-        passed = score == len(key)
+        # Score: map each chosen position back through the shuffle to a canonical
+        # option key, then compare it to that bank question's answer.
+        score = 0
+        for pos, q in zip(positions, served):
+            qi = q.get("qi")
+            if not isinstance(qi, int) or qi < 0 or qi >= len(bank):
+                return jsonify({"error": "Malformed quiz session.", "expired": True}), 400
+            chosen_key = q["order"][pos]
+            if hmac.compare_digest(chosen_key, bank[qi]["answer"]):
+                score += 1
+
+        total = len(served)
+        passed = score == total
 
         result = {
             "passed": passed,
-            "correct": correct,
             "score": score,
-            "total": len(key),
+            "total": total,
             "payout": {"sent": False, "txid": None, "note": None},
         }
 

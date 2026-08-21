@@ -6,8 +6,18 @@
  * Expects: LESSONS (lessons.js), Progress (progress.js), CONFIG (config.js),
  *          confetti (confetti.js)
  *
- * Scoring happens on the server. This file does not know the answers and must
- * never be given them — see the header of lessons.js.
+ * Anti-bot flow (see api.py): the client never holds the answers. On render it
+ * asks the faucet for a quiz *session* — a signed, single-use, short-lived token
+ * that pins which questions to show and, for each, a freshly shuffled option
+ * order. The client renders that layout from the local question text and submits
+ * the option *positions* the user picked, never a letter. Because the order
+ * changes every session and the token cannot be replayed, a memorised answer
+ * sequence is useless. A wrong submission is told only its score, never which
+ * questions were wrong, so it cannot be walked to the key.
+ *
+ * The server's question bank for a lesson and this file's `lesson.quiz` array are
+ * index-aligned: the session refers to questions by their index (`qi`) into that
+ * array, so the two must stay the same length per lesson.
  */
 
 const Quiz = (() => {
@@ -60,19 +70,74 @@ const Quiz = (() => {
       return;
     }
 
-    const questions = lesson.quiz.map((q, i) => `
-      <div class="quiz-question" id="q${i}">
-        <p class="q-prompt">${i + 1}. ${esc(q.prompt)}</p>
-        <div class="q-options">
-          ${Object.entries(q.options).map(([key, val]) => `
-            <label class="q-option">
-              <input type="radio" name="q${i}" value="${esc(key)}">
-              <span>${esc(val)}</span>
-            </label>
-          `).join("")}
-        </div>
-      </div>
-    `).join("");
+    // Faucet mode: fetch a scored session and render it.
+    startAttempt(lesson, container);
+  }
+
+  // ── Session lifecycle ────────────────────────────────────────────────────
+  async function startAttempt(lesson, container, note) {
+    container.innerHTML = `
+      <div class="quiz-result"><div class="result-pending">Loading quiz…</div></div>`;
+
+    let session;
+    try {
+      session = await fetchSession(lesson.id);
+    } catch (err) {
+      // The server issues the questions, so if it is unreachable there is no
+      // quiz to take. Say so plainly and award nothing; the lesson text stays
+      // readable, and with no faucet configured at all we fall into study mode.
+      container.innerHTML = `
+        <div class="quiz-result">
+          <div class="result-fail">
+            Couldn't reach the scoring server, so this quiz can't be marked right now.
+            Try again in a little while. Every lesson is readable in the meantime.
+          </div>
+        </div>`;
+      return;
+    }
+
+    renderForm(lesson, container, session, note);
+  }
+
+  async function fetchSession(lessonId) {
+    const resp = await fetch(
+      faucetEndpoint(`/api/quiz/start?lessonId=${encodeURIComponent(lessonId)}`),
+      { method: "GET", credentials: "omit", referrerPolicy: "no-referrer" }
+    );
+    const data = await resp.json();
+    if (!resp.ok || !data || !data.token || !Array.isArray(data.questions)) {
+      throw new Error((data && data.error) || "could not start quiz");
+    }
+    return data;
+  }
+
+  function renderForm(lesson, container, session, note) {
+    // Every served question must exist in this file's bank; if the server is
+    // ahead of a cached lessons.js we cannot render it safely.
+    const sources = session.questions.map(q => lesson.quiz[q.qi]);
+    if (sources.some(s => !s)) {
+      container.innerHTML = `
+        <div class="quiz-result">
+          <div class="result-fail">
+            This quiz is being updated right now. Please refresh the page in a little while.
+          </div>
+        </div>`;
+      return;
+    }
+
+    const questions = session.questions.map((q, i) => {
+      const source = sources[i];
+      const opts = q.order.map((key, pos) => `
+        <label class="q-option">
+          <input type="radio" name="q${i}" value="${pos}">
+          <span>${esc(source.options[key])}</span>
+        </label>`).join("");
+      return `
+        <div class="quiz-question" id="q${i}">
+          <p class="q-prompt">${i + 1}. ${esc(source.prompt)}</p>
+          <div class="q-options">${opts}</div>
+        </div>`;
+    }).join("");
 
     const addressBlock = faucetConfigured() ? `
       <div class="quiz-address">
@@ -92,8 +157,12 @@ const Quiz = (() => {
         <p class="addr-help">Rewards are paused right now. The quiz still counts toward your XP.</p>
       </div>`;
 
+    const noteHTML = note
+      ? `<div class="study-mode-note">${esc(note)}</div>` : "";
+
     container.innerHTML = `
       <form id="quizForm" class="quiz-form" novalidate>
+        ${noteHTML}
         ${questions}
         ${addressBlock}
         <button type="submit" class="btn-submit">Submit Quiz</button>
@@ -102,33 +171,33 @@ const Quiz = (() => {
 
     document.getElementById("quizForm").addEventListener("submit", e => {
       e.preventDefault();
-      handleSubmit(lesson);
+      handleSubmit(lesson, container, session);
     });
   }
 
   // ── Submit ──────────────────────────────────────────────────────────────
-  async function handleSubmit(lesson) {
+  async function handleSubmit(lesson, container, session) {
     const form   = document.getElementById("quizForm");
     const result = document.getElementById("quizResult");
-    const total  = lesson.quiz.length;
+    const total  = session.questions.length;
 
-    // Collect answers. Every question must be answered before we call the API,
-    // both to be fair to the user and to avoid burning one of their attempts.
+    // Collect the chosen option positions. Every question must be answered
+    // before we call the API, both to be fair and to avoid burning the session.
     const answers = [];
     let unanswered = false;
 
-    lesson.quiz.forEach((q, i) => {
+    for (let i = 0; i < total; i++) {
       const selected = form.querySelector(`input[name="q${i}"]:checked`);
       const questionEl = document.getElementById(`q${i}`);
-      questionEl.classList.remove("correct", "incorrect", "unanswered");
+      questionEl.classList.remove("unanswered");
       if (selected) {
-        answers.push(selected.value);
+        answers.push(parseInt(selected.value, 10));
       } else {
-        answers.push("");
+        answers.push(-1);
         unanswered = true;
         questionEl.classList.add("unanswered");
       }
-    });
+    }
 
     result.classList.remove("hidden");
 
@@ -144,21 +213,22 @@ const Quiz = (() => {
 
     let data;
     try {
-      data = await score(lesson.id, answers, address);
+      data = await submitAnswers(session.token, answers, address);
     } catch (err) {
-      // The server is the only thing that knows the answers, so if it is
-      // unreachable we genuinely cannot mark this quiz. Say so and award
-      // nothing — quietly passing the user would make the badge meaningless
-      // and would let anyone complete the whole site by pulling their network
-      // cable. The lesson text stays readable, and study mode (below) keeps
-      // every lesson reachable while the server is down.
       submitBtn.disabled = false;
       result.innerHTML = `
         <div class="result-fail">
           Couldn't reach the scoring server, so this quiz can't be marked right now.
           Your answers weren't lost — try again in a little while.
-          Every lesson is readable in the meantime.
         </div>`;
+      return;
+    }
+
+    // The session expired or was already used. Quietly fetch a fresh one; the
+    // token is single-use by design, so a retry always needs a new session.
+    if (data.expired) {
+      startAttempt(lesson, container,
+        "This quiz session refreshed. Here's a fresh set — answer and submit again.");
       return;
     }
 
@@ -168,24 +238,22 @@ const Quiz = (() => {
       return;
     }
 
-    // Per-question marking from the server's response.
-    (data.correct || []).forEach((isCorrect, i) => {
-      const questionEl = document.getElementById(`q${i}`);
-      if (questionEl) questionEl.classList.add(isCorrect ? "correct" : "incorrect");
-    });
-
     if (!data.passed) {
-      submitBtn.disabled = false;
+      // The server never tells us which questions were wrong (that would leak
+      // the key), so we can only show the score and offer a fresh attempt.
       result.innerHTML = `
         <div class="result-fail">
-          <strong>${data.score}/${data.total} correct.</strong>
-          Review the highlighted questions and try again.
+          <strong>${esc(String(data.score))}/${esc(String(data.total))} correct.</strong>
+          Re-read the lesson and try again.
+          <div class="quiz-next-row">
+            <button type="button" class="btn-next" id="quizRetryBtn">Try again</button>
+          </div>
         </div>`;
-      setTimeout(() => {
-        form.querySelectorAll(".quiz-question").forEach(el =>
-          el.classList.remove("correct", "incorrect", "unanswered"));
-        result.classList.add("hidden");
-      }, 6000);
+      const retry = document.getElementById("quizRetryBtn");
+      if (retry) {
+        retry.addEventListener("click", () =>
+          startAttempt(lesson, container, "Fresh questions — give it another go."));
+      }
       return;
     }
 
@@ -195,15 +263,8 @@ const Quiz = (() => {
     finalize(lesson, result);
   }
 
-  // ── API call ────────────────────────────────────────────────────────────
-  async function score(lessonId, answers, address) {
-    if (!faucetConfigured()) {
-      // No server configured at all — this is a deliberate offline mode, not an
-      // error. Throwing sends us down the "server unreachable" path.
-      throw new Error("no faucet configured");
-    }
-
-    const body = { lessonId, answers };
+  async function submitAnswers(token, answers, address) {
+    const body = { token, answers };
     if (address) body.address = address;
 
     const resp = await fetch(faucetEndpoint("/api/quiz"), {

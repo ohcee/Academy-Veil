@@ -87,13 +87,16 @@ export VEIL_RPC_HOST=127.0.0.1
 export VEIL_RPC_PORT=58812
 
 export FAUCET_SECRET="$(python3 -c 'import secrets;print(secrets.token_hex(32))')"
-export FAUCET_ORIGINS=https://ohcee.github.io
+export FAUCET_ORIGINS=https://academy.veil-info.org
 export FAUCET_TRUSTED_PROXIES=1
 
 export FAUCET_DAILY_CAP=10
 export FAUCET_REWARD=1
 export FAUCET_GLOBAL_DAILY=500
 export FAUCET_MIN_RESERVE=100
+
+export FAUCET_RING_SIZE=11      # ring size for payouts; 11 is the network default
+export FAUCET_QUIZ_TTL=1800     # seconds a quiz session token stays valid
 ```
 
 `api.py` refuses to start if `FAUCET_SECRET`, `FAUCET_ORIGINS`, the RPC
@@ -208,8 +211,27 @@ Commit and push; Pages redeploys. With `FAUCET_URL: null` the site runs in study
 mode — all lessons readable, quizzes shown as self-check, no payouts offered.
 
 The origin in `FAUCET_ORIGINS` must exactly match the site's origin or the
-browser blocks the request. For GitHub Pages that is `https://ohcee.github.io`,
-with no path and no trailing slash.
+browser blocks the request. Use the origin **as it appears in the address bar**,
+with no path and no trailing slash. The live site is served from the custom
+domain, so that is `https://academy.veil-info.org` — **not** the underlying
+`https://ohcee.github.io`. A GitHub Pages custom domain sends its own origin, so
+listing only the `github.io` name silently breaks every quiz with a CORS error
+(`fetch` fails and the page says it "couldn't reach the scoring server"). The
+value is comma-separated if you need to allow both:
+
+```
+FAUCET_ORIGINS=https://academy.veil-info.org,https://ohcee.github.io
+```
+
+### Deploy order matters
+
+The quiz flow spans both halves: the frontend calls `GET /api/quiz/start` for a
+signed session, then `POST /api/quiz` with that token. An old cached frontend
+cannot talk to nothing, and a new frontend cannot talk to an old backend that has
+no `/start` route. Both cases fail **closed** (no payout, "couldn't reach the
+scoring server"), which is safe, but to avoid a visible gap deploy the **backend
+first** (`git pull` on the server, then restart the service), then push the
+frontend. Cached clients heal on refresh.
 
 ---
 
@@ -223,15 +245,39 @@ curl https://faucet.example.org/api/health
 `payouts: false` means either the node is unreachable or the wallet is at the
 reserve floor.
 
-Confirm the spoofing protection is actually on:
+Confirm a quiz session starts (this reveals nothing about the answers):
 
 ```bash
-# Should NOT get a second payout — same real IP regardless of the header.
-curl -X POST https://faucet.example.org/api/quiz \
-     -H 'Content-Type: application/json' \
-     -H 'X-Forwarded-For: 9.9.9.9' \
-     -d '{"lessonId":1,"answers":["b","a","b","c","a"],"address":"sv1…"}'
+curl 'https://faucet.example.org/api/quiz/start?lessonId=1'
+# {"token":"…","ttl":1800,"questions":[{"qi":3,"order":["c","a","b"]}, …]}
 ```
+
+Scoring is a two-step flow now: the client fetches a token from `/start`, then
+submits the option **positions** it chose to `/api/quiz` with that token. A bare
+`POST /api/quiz` with hardcoded letters (the old format) is rejected — there is
+nothing to memorise and replay.
+
+---
+
+## Quiz sessions and the answer key
+
+The answer key never reaches the browser. `/api/quiz/start` hands out a signed,
+single-use, short-lived token that pins which questions are asked and a freshly
+shuffled option order for each; the client renders that and submits positions, so
+a memorised answer sequence is worthless and a captured token cannot be replayed.
+A failing submission is told only its score, never which questions were wrong.
+
+`answers.json` accepts two per-lesson shapes (see `answers.example.json`):
+
+- **Legacy** — a bare list of correct letters, e.g. `"1": ["b","a","c","a","b"]`.
+  Assumes three options `a`, `b`, `c` per question. The existing key is already
+  in this form, so the protections above turn on with **no edit to the key** —
+  just deploy the new `api.py` and restart.
+- **Explicit** — `{"serve": 5, "questions": [{"options":["a","b","c"],"answer":"b"}, …]}`.
+  Required only for a question **bank** (author more than five questions and serve
+  a random subset each attempt) or for questions that aren't three `a`/`b`/`c`
+  options. The bank and the lesson's `quiz[]` array in `lessons.js` are
+  index-aligned and must be the same length.
 
 ---
 
@@ -240,10 +286,19 @@ curl -X POST https://faucet.example.org/api/quiz \
 Worth being honest about, since it is a faucet.
 
 **Handled:** direct API calls without passing a quiz; answer keys extracted from
-the page source; `X-Forwarded-For` spoofing; concurrent requests racing the cap
-check; brute-forcing a 5-question quiz; claiming one lesson repeatedly; payouts
-to transparent addresses; draining the wallet past a reserve; a global spend
-ceiling regardless of how many clients appear.
+the page source; **memorising an answer sequence and replaying it** (option order
+is shuffled per attempt and the session token is single-use and short-lived);
+**walking the key with a per-question oracle** (a failing response returns only
+the score, never which answers were wrong); `X-Forwarded-For` spoofing; concurrent
+requests racing the cap check; brute-forcing a quiz (capped attempts, and with a
+question bank each attempt draws a different subset); claiming one lesson
+repeatedly; payouts to transparent addresses; draining the wallet past a reserve;
+a global spend ceiling regardless of how many clients appear.
+
+**Not handled by any of the above:** a bot that genuinely reads each shuffled
+question and answers it correctly (e.g. an LLM). Nothing client-rendered can stop
+that; the defence is economic — a small reward, the per-client and global daily
+caps, and `FAUCET_GLOBAL_DAILY` as the hard ceiling on a day's loss.
 
 **Not handled:** someone with a large pool of genuinely distinct IP addresses.
 A botnet or a wide VPN pool can collect the per-client cap repeatedly. This is
