@@ -7,7 +7,7 @@
  *          confetti (confetti.js)
  *
  * Anti-bot flow (see api.py): the client never holds the answers. On render it
- * asks the faucet for a quiz *session* — a signed, single-use, short-lived token
+ * asks the faucet for a quiz *session*, a signed, single-use, short-lived token
  * that pins which questions to show and, for each, a freshly shuffled option
  * order. The client renders that layout from the local question text and submits
  * the option *positions* the user picked, never a letter. Because the order
@@ -37,12 +37,26 @@ const Quiz = (() => {
     if (!container) return;
 
     if (Progress.isComplete(lesson.id)) {
+      // Completed lessons stay "done" for progression, and XP is earned only
+      // once (see finalize). But the faucet pays once per lesson *per day*, so a
+      // finished lesson can be taken again for that day's reward. Study mode has
+      // no payout, so there is nothing to retake for there.
+      const canRetake = !Progress.studyMode();
       container.innerHTML = `
         <div class="quiz-done">
           <div class="quiz-done-icon">✓</div>
-          <p>You've already completed this lesson.</p>
-          ${nextBtn(lesson.id)}
+          <p>You've already completed this lesson.${canRetake
+            ? " You can take it again for today's reward. Your XP stays as it is." : ""}</p>
+          <div class="quiz-next-row">
+            ${canRetake ? `<button type="button" class="btn-next" id="quizRetakeBtn">Take the quiz again</button>` : ""}
+            ${nextBtn(lesson.id)}
+          </div>
         </div>`;
+      const retake = document.getElementById("quizRetakeBtn");
+      if (retake) {
+        retake.addEventListener("click", () => startAttempt(lesson, container,
+          "Answer again to earn today's reward. Your XP stays as it is."));
+      }
       return;
     }
 
@@ -143,14 +157,14 @@ const Quiz = (() => {
       <div class="quiz-address">
         <label for="veilAddress">
           Your stealth address
-          <span class="label-note">optional — for your ${esc(CONFIG.REWARD_TEXT)} reward</span>
+          <span class="label-note">optional, for your ${esc(CONFIG.REWARD_TEXT)} reward</span>
         </label>
         <input type="text" id="veilAddress" placeholder="sv1…"
                autocomplete="off" spellcheck="false" maxlength="200">
         <p class="addr-help">
           Payouts are sent as RingCT to stealth addresses (sv…) only, so the payment
           stays private. Capped at ${esc(CONFIG.DAILY_CAP_TEXT)}. Leave this blank to
-          just take the quiz — you'll still earn XP and unlock the next lesson.
+          just take the quiz, you'll still earn XP and unlock the next lesson.
         </p>
       </div>` : `
       <div class="quiz-address">
@@ -219,7 +233,7 @@ const Quiz = (() => {
       result.innerHTML = `
         <div class="result-fail">
           Couldn't reach the scoring server, so this quiz can't be marked right now.
-          Your answers weren't lost — try again in a little while.
+          Your answers weren't lost, try again in a little while.
         </div>`;
       return;
     }
@@ -228,7 +242,7 @@ const Quiz = (() => {
     // token is single-use by design, so a retry always needs a new session.
     if (data.expired) {
       startAttempt(lesson, container,
-        "This quiz session refreshed. Here's a fresh set — answer and submit again.");
+        "This quiz session refreshed. Here's a fresh set, answer and submit again.");
       return;
     }
 
@@ -252,7 +266,7 @@ const Quiz = (() => {
       const retry = document.getElementById("quizRetryBtn");
       if (retry) {
         retry.addEventListener("click", () =>
-          startAttempt(lesson, container, "Fresh questions — give it another go."));
+          startAttempt(lesson, container, "Fresh questions, give it another go."));
       }
       return;
     }
@@ -289,7 +303,7 @@ const Quiz = (() => {
       const short = esc(String(payout.txid).slice(0, 24));
       return `
         <div class="result-pass">
-          ✓ All correct — ${esc(CONFIG.REWARD_TEXT)} sent!<br>
+          ✓ All correct, ${esc(CONFIG.REWARD_TEXT)} sent!<br>
           <span class="txid">txid:
             <a href="${esc(CONFIG.EXPLORER_TX)}${encodeURIComponent(payout.txid)}"
                target="_blank" rel="noopener noreferrer">${short}…</a>
