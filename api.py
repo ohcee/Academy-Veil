@@ -3,7 +3,7 @@ Veil Academy Faucet API
 ═══════════════════════
 Scores quizzes server-side and pays passing users in RingCT.
 
-Design notes — please read before changing anything:
+Design notes, please read before changing anything:
 
   * The answer key lives ONLY here (answers.json, gitignored). It is never sent
     to the browser. The client submits answers; this service scores them. If you
@@ -139,13 +139,13 @@ def _load_answers(path):
 
     Two on-disk formats are accepted per lesson:
 
-      * Legacy — a bare list of correct option letters, one per question:
+      * Legacy, a bare list of correct option letters, one per question:
             "1": ["b", "a", "b", "a", "a"]
         Each question is assumed to have options a, b, c (every current lesson
         does). This is what the existing answers.json already uses, so no edit
         is needed to deploy the shuffle/token protections.
 
-      * Explicit — required for a question bank or for anything other than three
+      * Explicit, required for a question bank or for anything other than three
         a/b/c options:
             "2": {"serve": 5, "questions": [
                      {"options": ["a","b","c"], "answer": "b"}, ...]}
@@ -312,7 +312,7 @@ class RPCError(RuntimeError):
     """
     `ambiguous` means we do not know whether the call took effect.
 
-    This matters only for sends. A refused connection is safe to retry — nothing
+    This matters only for sends. A refused connection is safe to retry, nothing
     happened. A timeout is not: veild may well have broadcast the transaction and
     simply not answered in time. Treating those two the same would let a slow
     node turn into a double payout.
@@ -357,7 +357,7 @@ def rpc(method: str, params: list, timeout: int = 30):
 
 def is_payable_stealth_address(addr: str) -> bool:
     """
-    Authoritative address check — ask the node, do not pattern-match.
+    Authoritative address check, ask the node, do not pattern-match.
 
     A payout must go to a stealth address; that is what makes the output RingCT
     and therefore private. Paying a basecoin address would publish the amount
@@ -525,8 +525,8 @@ def count_attempt(conn, client: str, lesson_id: int) -> int:
 # HMAC-signed with FAUCET_SECRET so the client cannot forge or edit it. Because
 # the option order is different every session and the token is single-use and
 # short-lived, a memorised answer sequence is worthless and a captured token
-# cannot be replayed. The permutation itself is not secret — the client needs it
-# to render the quiz — so it travels in the clear inside the signed payload.
+# cannot be replayed. The permutation itself is not secret, the client needs it
+# to render the quiz, so it travels in the clear inside the signed payload.
 
 
 def _sign(b64: str) -> str:
@@ -591,7 +591,7 @@ def health():
 def quiz_start():
     """
     Begin a quiz attempt. Returns a signed session token plus the questions to
-    show — which ones, and the order to render each one's options — so the client
+    show, which ones, and the order to render each one's options, so the client
     can render the quiz without ever seeing the answer key.
 
     Request:  /api/quiz/start?lessonId=1
@@ -616,7 +616,7 @@ def quiz_start():
     serve = min(spec["serve"], len(bank))
 
     # Random subset, random question order, and a fresh option order per
-    # question — all three vary from one attempt to the next.
+    # question, all three vary from one attempt to the next.
     served = []
     for qi in _RNG.sample(range(len(bank)), serve):
         order = list(bank[qi]["options"])
@@ -651,7 +651,7 @@ def quiz():
     A failing response returns only the score, never which questions were wrong.
     A per-question oracle plus a few attempts would otherwise leak the whole key.
     The token is single-use and short-lived, so a failed attempt cannot be
-    re-scored — the client fetches a fresh session to try again.
+    re-scored, the client fetches a fresh session to try again.
     """
     body = request.get_json(silent=True)
     if not isinstance(body, dict):
@@ -745,7 +745,7 @@ def quiz():
 
         address = (body.get("address") or "").strip()
         if not address:
-            result["payout"]["note"] = "No address supplied — no payout requested."
+            result["payout"]["note"] = "No address supplied, no payout requested."
             return jsonify(result)
 
         if len(address) > 200:
@@ -779,7 +779,7 @@ def quiz():
                           lesson_id, exc)
                 result["payout"]["note"] = (
                     "The faucet timed out while sending. If the payment went through "
-                    "it will arrive shortly — check your wallet before retrying."
+                    "it will arrive shortly, check your wallet before retrying."
                 )
             else:
                 release(conn, client, lesson_id, REWARD)
@@ -815,5 +815,5 @@ init_db()
 if __name__ == "__main__":
     # Development only. In production run under gunicorn behind a TLS proxy:
     #   gunicorn -w 2 -b 127.0.0.1:5000 api:app
-    log.warning("Starting Flask development server — do not use this in production.")
+    log.warning("Starting Flask development server, do not use this in production.")
     app.run(port=5000, host="127.0.0.1")
